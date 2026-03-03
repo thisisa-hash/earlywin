@@ -1078,7 +1078,7 @@
     <div class="exec-kpi-card" style="--card-accent:#a78bfa">
       <div class="exec-kpi-header">
         <div class="exec-kpi-title">Both Features Overlap</div>
-        <div class="exec-kpi-subtitle">Users who used both EW &amp; CO &middot; All Markets</div>
+        <div class="exec-kpi-subtitle">Users who used both Early Win &amp; Cash Out &middot; All Markets</div>
       </div>
       <div class="exec-kpi-body">
         <div class="exec-kpi-col">
@@ -1092,7 +1092,7 @@
         </div>
       </div>
       <div class="exec-kpi-footer">
-        <span class="exec-kpi-badge warning">Most CO users have never tried Early Win</span>
+        <span class="exec-kpi-badge warning">Most Cash Out users have never tried Early Win</span>
       </div>
     </div>
 
@@ -1105,16 +1105,60 @@
       <div class="exec-kpi-body">
         <div class="exec-kpi-col">
           <div class="exec-kpi-value nonvip">14.5%</div>
-          <div class="exec-kpi-label">Non-VIP CO-only</div>
+          <div class="exec-kpi-label">Non-VIP Cash Out Only</div>
         </div>
         <div class="exec-kpi-vs">vs</div>
         <div class="exec-kpi-col">
           <div class="exec-kpi-value vip">33.2%</div>
-          <div class="exec-kpi-label">VIP CO-only</div>
+          <div class="exec-kpi-label">VIP Cash Out Only</div>
         </div>
       </div>
       <div class="exec-kpi-footer">
-        <span class="exec-kpi-badge danger">Brazil VIP: 39.4% cash out but skip EW</span>
+        <span class="exec-kpi-badge danger">Brazil VIP: 39.4% cash out but skip Early Win</span>
+      </div>
+    </div>
+
+    <!-- Card 5: Bet Complexity (Legs) -->
+    <div class="exec-kpi-card" style="--card-accent:#22d3ee">
+      <div class="exec-kpi-header">
+        <div class="exec-kpi-title">Bet Complexity — Avg Legs</div>
+        <div class="exec-kpi-subtitle">Non-VIP &middot; All Bet Types &middot; Greece &amp; Brazil</div>
+      </div>
+      <div class="exec-kpi-body">
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-value nonvip" style="font-size:28px">6.0 / 7.2</div>
+          <div class="exec-kpi-label">All Bets (GR / BR)</div>
+        </div>
+        <div class="exec-kpi-vs">vs</div>
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-value vip" style="font-size:28px;color:#22d3ee">8.4 / 9.7</div>
+          <div class="exec-kpi-label">Early Win Bets (GR / BR)</div>
+        </div>
+      </div>
+      <div class="exec-kpi-footer">
+        <span class="exec-kpi-badge info">Early Win bets have 35&ndash;55% more legs than average</span>
+      </div>
+    </div>
+
+    <!-- Card 6: Staking Behaviour -->
+    <div class="exec-kpi-card" style="--card-accent:#f472b6">
+      <div class="exec-kpi-header">
+        <div class="exec-kpi-title">Staking Behaviour — Avg Stake</div>
+        <div class="exec-kpi-subtitle">Non-VIP &middot; All Bet Types &middot; Greece &amp; Brazil</div>
+      </div>
+      <div class="exec-kpi-body">
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-value nonvip" style="font-size:28px">&euro;7.5 / &euro;4.3</div>
+          <div class="exec-kpi-label">Early Win (GR / BR)</div>
+        </div>
+        <div class="exec-kpi-vs">vs</div>
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-value vip" style="font-size:28px;color:#f472b6">&euro;14.3 / &euro;7.3</div>
+          <div class="exec-kpi-label">Cash Out (GR / BR)</div>
+        </div>
+      </div>
+      <div class="exec-kpi-footer">
+        <span class="exec-kpi-badge warning">Cash Out carries ~2&times; higher stakes &middot; VIP Cash Out peaks at &euro;52.6 (GR)</span>
       </div>
     </div>
 
@@ -1122,14 +1166,14 @@
 
   <div class="exec-divider"></div>
 
-  <!-- Country Comparison Chart -->
+  <!-- Bettor Profiles Chart -->
   <div class="exec-chart-section">
     <div class="exec-section-header">
-      <div class="exec-section-eyebrow">Country Comparison</div>
-      <div class="exec-section-title">Early Win &amp; Cash Out Adoption by Market</div>
+      <div class="exec-section-eyebrow">Bettor Profiles</div>
+      <div class="exec-section-title">Two Distinct User Types: Complexity-Seekers vs Value-Seekers</div>
     </div>
     <div class="exec-chart-wrap">
-      <div id="exec-chart-adoption" style="width:100%;height:400px;"></div>
+      <div id="exec-chart-profiles" style="width:100%;height:380px;"></div>
     </div>
   </div>
 
@@ -1147,11 +1191,11 @@
       <div class="exec-country-card-name">Greece</div>
       <div class="exec-metric-header"><span>Non-VIP</span><span>VIP</span></div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">EW Adoption</span>
+        <span class="exec-metric-label">Early Win Adoption</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv">6.0%</span><span class="exec-metric-vip">10.2%</span></div>
       </div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">CO Adoption</span>
+        <span class="exec-metric-label">Cash Out Adoption</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv">15.9%</span><span class="exec-metric-vip">36.3%</span></div>
       </div>
       <div class="exec-metric-row">
@@ -1159,8 +1203,12 @@
         <div class="exec-metric-vals"><span class="exec-metric-nv">2.6%</span><span class="exec-metric-vip">6.7%</span></div>
       </div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">CO/EW Ratio</span>
-        <div class="exec-metric-vals"><span class="exec-metric-nv">2.7&times;</span><span class="exec-metric-vip">3.6&times;</span></div>
+        <span class="exec-metric-label">Avg Legs (Early Win)</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">8.4</span><span class="exec-metric-vip">8.4</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Avg Stake (Cash Out)</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">&euro;14.3</span><span class="exec-metric-vip">&euro;52.6</span></div>
       </div>
     </div>
 
@@ -1169,20 +1217,24 @@
       <div class="exec-country-card-name">Brazil <span class="exec-country-tag opportunity">Opportunity</span></div>
       <div class="exec-metric-header"><span>Non-VIP</span><span>VIP</span></div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">EW Adoption</span>
+        <span class="exec-metric-label">Early Win Adoption</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv">3.4%</span><span class="exec-metric-vip">8.9%</span></div>
       </div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">CO Adoption</span>
+        <span class="exec-metric-label">Cash Out Adoption</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv">18.1%</span><span class="exec-metric-vip">45.9%</span></div>
       </div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">Both Features</span>
-        <div class="exec-metric-vals"><span class="exec-metric-nv">1.8%</span><span class="exec-metric-vip">6.5%</span></div>
+        <span class="exec-metric-label">Cash Out Only (VIP)</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">16.3%</span><span class="exec-metric-vip" style="color:#fbbf24">39.4%</span></div>
       </div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">CO-only VIP</span>
-        <div class="exec-metric-vals"><span class="exec-metric-nv">16.3%</span><span class="exec-metric-vip" style="color:#fbbf24">39.4%</span></div>
+        <span class="exec-metric-label">Avg Legs (Early Win)</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">9.7</span><span class="exec-metric-vip">8.9</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Avg Stake (Cash Out)</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">&euro;7.3</span><span class="exec-metric-vip">&euro;30.2</span></div>
       </div>
     </div>
 
@@ -1191,11 +1243,11 @@
       <div class="exec-country-card-name">Mexico <span class="exec-country-tag leader">Leader</span></div>
       <div class="exec-metric-header"><span>Non-VIP</span><span>VIP</span></div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">EW Adoption</span>
+        <span class="exec-metric-label">Early Win Adoption</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv">10.7%</span><span class="exec-metric-vip" style="color:#34d399">19.4%</span></div>
       </div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">CO Adoption</span>
+        <span class="exec-metric-label">Cash Out Adoption</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv">21.5%</span><span class="exec-metric-vip">40.3%</span></div>
       </div>
       <div class="exec-metric-row">
@@ -1203,7 +1255,7 @@
         <div class="exec-metric-vals"><span class="exec-metric-nv">6.0%</span><span class="exec-metric-vip">13.5%</span></div>
       </div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">CO/EW Ratio</span>
+        <span class="exec-metric-label">Cash Out / Early Win Ratio</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv">2.0&times;</span><span class="exec-metric-vip">2.1&times;</span></div>
       </div>
     </div>
@@ -1213,11 +1265,11 @@
       <div class="exec-country-card-name">Chile</div>
       <div class="exec-metric-header"><span>Non-VIP</span><span>VIP</span></div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">EW Adoption</span>
+        <span class="exec-metric-label">Early Win Adoption</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv">7.8%</span><span class="exec-metric-vip">14.9%</span></div>
       </div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">CO Adoption</span>
+        <span class="exec-metric-label">Cash Out Adoption</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv">21.0%</span><span class="exec-metric-vip">42.0%</span></div>
       </div>
       <div class="exec-metric-row">
@@ -1225,7 +1277,7 @@
         <div class="exec-metric-vals"><span class="exec-metric-nv">4.0%</span><span class="exec-metric-vip">10.9%</span></div>
       </div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">CO/EW Ratio</span>
+        <span class="exec-metric-label">Cash Out / Early Win Ratio</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv">2.7&times;</span><span class="exec-metric-vip">2.8&times;</span></div>
       </div>
     </div>
@@ -1235,11 +1287,11 @@
       <div class="exec-country-card-name">Ecuador</div>
       <div class="exec-metric-header"><span>Non-VIP</span><span>VIP</span></div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">EW Adoption</span>
+        <span class="exec-metric-label">Early Win Adoption</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv">8.9%</span><span class="exec-metric-vip">13.0%</span></div>
       </div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">CO Adoption</span>
+        <span class="exec-metric-label">Cash Out Adoption</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv">23.0%</span><span class="exec-metric-vip">37.2%</span></div>
       </div>
       <div class="exec-metric-row">
@@ -1247,7 +1299,7 @@
         <div class="exec-metric-vals"><span class="exec-metric-nv">4.8%</span><span class="exec-metric-vip">7.2%</span></div>
       </div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">CO/EW Ratio</span>
+        <span class="exec-metric-label">Cash Out / Early Win Ratio</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv">2.6&times;</span><span class="exec-metric-vip">2.9&times;</span></div>
       </div>
     </div>
@@ -1257,11 +1309,11 @@
       <div class="exec-country-card-name">Ireland <span class="exec-country-tag watch">Watch</span></div>
       <div class="exec-metric-header"><span>Non-VIP</span><span>VIP</span></div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">EW Adoption</span>
+        <span class="exec-metric-label">Early Win Adoption</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv" style="color:#f87171">3.7%</span><span class="exec-metric-vip">9.6%</span></div>
       </div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">CO Adoption</span>
+        <span class="exec-metric-label">Cash Out Adoption</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv" style="color:#f87171">10.2%</span><span class="exec-metric-vip">27.8%</span></div>
       </div>
       <div class="exec-metric-row">
@@ -1269,116 +1321,9 @@
         <div class="exec-metric-vals"><span class="exec-metric-nv">1.9%</span><span class="exec-metric-vip">6.8%</span></div>
       </div>
       <div class="exec-metric-row">
-        <span class="exec-metric-label">CO/EW Ratio</span>
+        <span class="exec-metric-label">Cash Out / Early Win Ratio</span>
         <div class="exec-metric-vals"><span class="exec-metric-nv">2.8&times;</span><span class="exec-metric-vip">2.9&times;</span></div>
       </div>
-    </div>
-
-  </div>
-
-  <div class="exec-divider"></div>
-
-  <!-- Opportunity Chart: CO-only (untapped EW potential) -->
-  <div class="exec-chart-section">
-    <div class="exec-section-header">
-      <div class="exec-section-eyebrow">Growth Opportunity</div>
-      <div class="exec-section-title">Cash Out Users Who Don't Use Early Win (Untapped Pool)</div>
-    </div>
-    <div class="exec-chart-wrap">
-      <div id="exec-chart-opportunity" style="width:100%;height:360px;"></div>
-    </div>
-  </div>
-
-  <div class="exec-divider"></div>
-
-  <!-- Key Findings -->
-  <div class="exec-section-header">
-    <div class="exec-section-eyebrow">Key Findings</div>
-    <div class="exec-section-title">What the Data Tells Us</div>
-  </div>
-  <div class="exec-finding-grid">
-
-    <div class="exec-finding-card insight">
-      <div class="exec-finding-icon">1</div>
-      <div class="exec-finding-card-title">Cash Out Dominates — Early Win Remains Niche</div>
-      <div class="exec-finding-card-desc">Cash Out adoption is <strong>2&ndash;5&times; higher</strong> than Early Win across all six markets. Even among VIPs, Cash Out reaches <strong>41%</strong> while Early Win sits at <strong>11%</strong>. The gap is largest in Brazil (46% vs 9% VIP).</div>
-    </div>
-
-    <div class="exec-finding-card opportunity">
-      <div class="exec-finding-icon">2</div>
-      <div class="exec-finding-card-title">Massive Untapped Pool in Brazil VIP</div>
-      <div class="exec-finding-card-desc"><strong>39.4%</strong> of Brazilian VIPs cash out regularly but have never tried Early Win. This is the single largest cross-sell opportunity — these users already engage with settlement features.</div>
-    </div>
-
-    <div class="exec-finding-card insight">
-      <div class="exec-finding-icon">3</div>
-      <div class="exec-finding-card-title">Mexico is the Early Win Leader</div>
-      <div class="exec-finding-card-desc">Mexico leads all markets with <strong>19.4% VIP</strong> and <strong>10.7% Non-VIP</strong> Early Win adoption — 2&ndash;3&times; higher than peers. The CO/EW ratio is the tightest at <strong>~2&times;</strong>, indicating stronger EW awareness.</div>
-    </div>
-
-    <div class="exec-finding-card warning">
-      <div class="exec-finding-icon">4</div>
-      <div class="exec-finding-card-title">Ireland Underperforms Across Both Features</div>
-      <div class="exec-finding-card-desc">Ireland has the lowest adoption for both features: Non-VIP EW at <strong>3.7%</strong> and CO at <strong>10.2%</strong>. This may signal broader feature visibility or market-specific barriers rather than an EW-specific issue.</div>
-    </div>
-
-    <div class="exec-finding-card opportunity">
-      <div class="exec-finding-icon">5</div>
-      <div class="exec-finding-card-title">VIPs Are 1.5&ndash;2.6&times; More Receptive</div>
-      <div class="exec-finding-card-desc">VIP segments consistently adopt Early Win at higher rates. The gap is widest in Mexico (<strong>1.8&times;</strong>) and Brazil (<strong>2.6&times;</strong>). VIP-first rollout strategies will yield the highest conversion.</div>
-    </div>
-
-    <div class="exec-finding-card action">
-      <div class="exec-finding-icon">6</div>
-      <div class="exec-finding-card-title">Early Win Users Build Longer Slips, Lower Stakes</div>
-      <div class="exec-finding-card-desc">EW bets average <strong>8.4&ndash;9.7 legs</strong> (35&ndash;55% more than market average) with below-average stakes. Cash Out users bet shorter slips with higher stakes — two distinct bettor profiles.</div>
-    </div>
-
-    <div class="exec-finding-card warning">
-      <div class="exec-finding-icon">7</div>
-      <div class="exec-finding-card-title">Cash Out is the Revenue Anchor</div>
-      <div class="exec-finding-card-desc">Greek VIP Cash Out averages <strong>&euro;52.61</strong> per bet — the highest single stake figure. Growing Early Win must not cannibalise Cash Out revenue. The two features serve different bettor needs.</div>
-    </div>
-
-    <div class="exec-finding-card action">
-      <div class="exec-finding-icon">8</div>
-      <div class="exec-finding-card-title">Position EW for Accumulator Builders</div>
-      <div class="exec-finding-card-desc">Early Win naturally attracts complexity-seekers who build long accumulators. Market it as <strong>partial-win protection for multi-leg bets</strong> to align with actual user behaviour and unlock new adoption.</div>
-    </div>
-
-  </div>
-
-  <div class="exec-divider"></div>
-
-  <!-- Recommended Actions -->
-  <div class="exec-section-header">
-    <div class="exec-section-eyebrow">Recommended Actions</div>
-    <div class="exec-section-title">Immediate Priorities</div>
-  </div>
-  <div class="exec-finding-grid">
-
-    <div class="exec-finding-card action">
-      <div class="exec-finding-icon" style="background:rgba(244,114,182,.15);color:#f472b6">A</div>
-      <div class="exec-finding-card-title">Brazil VIP Cross-Sell Campaign</div>
-      <div class="exec-finding-card-desc">Target the <strong>39.4%</strong> of VIPs who cash out but never use Early Win via in-app nudges, CRM flows, and betslip prompts. Highest-impact, lowest-effort action.</div>
-    </div>
-
-    <div class="exec-finding-card opportunity">
-      <div class="exec-finding-icon" style="background:rgba(52,211,153,.15);color:#34d399">B</div>
-      <div class="exec-finding-card-title">Study the Mexico Playbook</div>
-      <div class="exec-finding-card-desc">Mexico has <strong>2&ndash;3&times;</strong> the Early Win adoption of peers. Investigate UI placement, promotions, sport mix, and feature visibility to replicate across other markets.</div>
-    </div>
-
-    <div class="exec-finding-card warning">
-      <div class="exec-finding-icon" style="background:rgba(251,191,36,.15);color:#fbbf24">C</div>
-      <div class="exec-finding-card-title">Investigate Ireland Underperformance</div>
-      <div class="exec-finding-card-desc">Audit feature visibility, sport coverage, and competitive landscape in Ireland. Low CO + EW adoption suggests systemic barriers, not just an Early Win problem.</div>
-    </div>
-
-    <div class="exec-finding-card insight">
-      <div class="exec-finding-icon" style="background:rgba(79,142,247,.15);color:#4f8ef7">D</div>
-      <div class="exec-finding-card-title">VIP-First Rollout Strategy</div>
-      <div class="exec-finding-card-desc">VIPs are <strong>~1.5&ndash;2.6&times;</strong> more receptive. Pilot every new Early Win initiative with VIP segments first, then expand to broader audience based on learnings.</div>
     </div>
 
   </div>
@@ -2416,72 +2361,49 @@ function switchTab(tab) {
 // EXECUTIVE REPORT CHARTS
 // ══════════════════════════════════════════════
 (function() {
-  var countries = ['Greece','Brazil','Mexico','Chile','Ecuador','Ireland'];
-  var nvEw  = [0.06, 0.034, 0.107, 0.078, 0.089, 0.037];
-  var nvCo  = [0.159, 0.181, 0.215, 0.210, 0.230, 0.102];
-  var vipEw = [0.102, 0.089, 0.194, 0.149, 0.130, 0.096];
-  var vipCo = [0.363, 0.459, 0.403, 0.420, 0.372, 0.278];
-
   var darkLayout = {
     paper_bgcolor:'#171c27', plot_bgcolor:'rgba(0,0,0,0)',
     font:{family:'DM Sans, sans-serif', color:'#8b93ad'},
-    margin:{t:50,b:50,l:60,r:30},
+    margin:{t:50,b:60,l:70,r:30},
     hovermode:'x unified',
     hoverlabel:{bgcolor:'#1e2436',bordercolor:'#252b3b',font:{family:'DM Sans',size:12,color:'#e8ecf4'}},
-    legend:{orientation:'h',x:0.5,y:1.12,xanchor:'center',font:{size:11,color:'#c8d0e8'},bgcolor:'rgba(0,0,0,0)'},
-    xaxis:{tickfont:{size:11,color:'#6b7591'},showgrid:false,zeroline:false,linecolor:'#252b3b'},
-    yaxis:{tickformat:'.0%',dtick:0.1,tickfont:{size:11,color:'#6b7591',family:'DM Mono'},gridcolor:'#1e2436',zeroline:false,showline:false}
+    legend:{orientation:'h',x:0.5,y:1.12,xanchor:'center',font:{size:11,color:'#c8d0e8'},bgcolor:'rgba(0,0,0,0)'}
   };
 
-  // Adoption comparison chart
-  var adoptionTraces = [
-    {name:'EW Non-VIP', type:'bar', x:countries, y:nvEw, marker:{color:'rgba(79,142,247,0.45)',line:{color:'#4f8ef7',width:1}},
-     text:nvEw.map(function(v){return (v*100).toFixed(1)+'%';}), textposition:'outside', textfont:{size:10,color:'#4f8ef7',family:'DM Mono'},cliponaxis:false,
-     hovertemplate:'EW Non-VIP: %{y:.1%}<extra></extra>'},
-    {name:'EW VIP', type:'bar', x:countries, y:vipEw, marker:{color:'#4f8ef7',line:{width:0}},
-     text:vipEw.map(function(v){return (v*100).toFixed(1)+'%';}), textposition:'outside', textfont:{size:10,color:'#4f8ef7',family:'DM Mono'},cliponaxis:false,
-     hovertemplate:'EW VIP: %{y:.1%}<extra></extra>'},
-    {name:'CO Non-VIP', type:'bar', x:countries, y:nvCo, marker:{color:'rgba(52,211,153,0.45)',line:{color:'#34d399',width:1}},
-     text:nvCo.map(function(v){return (v*100).toFixed(1)+'%';}), textposition:'outside', textfont:{size:10,color:'#34d399',family:'DM Mono'},cliponaxis:false,
-     hovertemplate:'CO Non-VIP: %{y:.1%}<extra></extra>'},
-    {name:'CO VIP', type:'bar', x:countries, y:vipCo, marker:{color:'#34d399',line:{width:0}},
-     text:vipCo.map(function(v){return (v*100).toFixed(1)+'%';}), textposition:'outside', textfont:{size:10,color:'#34d399',family:'DM Mono'},cliponaxis:false,
-     hovertemplate:'CO VIP: %{y:.1%}<extra></extra>'}
-  ];
-  var adoptionLayout = JSON.parse(JSON.stringify(darkLayout));
-  adoptionLayout.barmode = 'group';
-  adoptionLayout.bargap = 0.25;
-  adoptionLayout.bargroupgap = 0.08;
-  adoptionLayout.yaxis.range = [0, 0.55];
-  Plotly.newPlot('exec-chart-adoption', adoptionTraces, adoptionLayout, {responsive:true, displayModeBar:false});
+  // Bettor profiles chart: Legs vs Stakes comparison (Greece & Brazil, Non-VIP)
+  var categories = ['Avg Legs<br>Greece','Avg Legs<br>Brazil','Avg Stake (€)<br>Greece','Avg Stake (€)<br>Brazil'];
+  var allBets  = [6.0, 7.2, 8.3, 4.3];
+  var ewBets   = [8.4, 9.7, 7.5, 4.3];
+  var coBets   = [5.5, 6.5, 14.3, 7.3];
 
-  // Opportunity chart: CO-only users (untapped EW potential)
-  var nvCoOnly  = [0.133, 0.163, 0.155, 0.170, 0.182, 0.083];
-  var vipCoOnly = [0.296, 0.394, 0.268, 0.311, 0.300, 0.211];
-  var oppTraces = [
-    {name:'Non-VIP (CO-only)', type:'bar', x:countries, y:nvCoOnly,
-     marker:{color:'rgba(251,146,60,0.5)',line:{color:'#fb923c',width:1}},
-     text:nvCoOnly.map(function(v){return (v*100).toFixed(1)+'%';}), textposition:'outside',
-     textfont:{size:11,color:'#fb923c',family:'DM Mono'},cliponaxis:false,
-     hovertemplate:'Non-VIP CO-only: %{y:.1%}<extra></extra>'},
-    {name:'VIP (CO-only)', type:'bar', x:countries, y:vipCoOnly,
-     marker:{color:'#fb923c',line:{width:0}},
-     text:vipCoOnly.map(function(v){return (v*100).toFixed(1)+'%';}), textposition:'outside',
-     textfont:{size:11,color:'#fb923c',family:'DM Mono'},cliponaxis:false,
-     hovertemplate:'VIP CO-only: %{y:.1%}<extra></extra>'}
+  var profileTraces = [
+    {name:'All Bets', type:'bar', x:categories, y:allBets,
+     marker:{color:'#a78bfa', opacity:0.7},
+     text:['6.0','7.2','€8.3','€4.3'], textposition:'outside',
+     textfont:{size:11,color:'#a78bfa',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'All Bets: %{y}<extra></extra>'},
+    {name:'Early Win Bets', type:'bar', x:categories, y:ewBets,
+     marker:{color:'#4f8ef7'},
+     text:['8.4','9.7','€7.5','€4.3'], textposition:'outside',
+     textfont:{size:11,color:'#4f8ef7',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Early Win Bets: %{y}<extra></extra>'},
+    {name:'Cash Out Bets', type:'bar', x:categories, y:coBets,
+     marker:{color:'#34d399'},
+     text:['5.5','6.5','€14.3','€7.3'], textposition:'outside',
+     textfont:{size:11,color:'#34d399',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Cash Out Bets: %{y}<extra></extra>'}
   ];
-  var oppLayout = JSON.parse(JSON.stringify(darkLayout));
-  oppLayout.barmode = 'group';
-  oppLayout.bargap = 0.35;
-  oppLayout.bargroupgap = 0.1;
-  oppLayout.yaxis.range = [0, 0.50];
-  oppLayout.annotations = [{
-    x:'Brazil', y:0.394, text:'<b>39.4%</b><br>Highest untapped pool',
-    showarrow:true, arrowhead:0, arrowcolor:'#fbbf24', arrowwidth:1,
-    ax:50, ay:-40, font:{size:11,color:'#fbbf24',family:'DM Sans'},
-    bgcolor:'rgba(30,36,54,0.9)', bordercolor:'#fbbf24', borderwidth:1, borderpad:6
-  }];
-  Plotly.newPlot('exec-chart-opportunity', oppTraces, oppLayout, {responsive:true, displayModeBar:false});
+  var profileLayout = JSON.parse(JSON.stringify(darkLayout));
+  profileLayout.barmode = 'group';
+  profileLayout.bargap = 0.3;
+  profileLayout.bargroupgap = 0.1;
+  profileLayout.xaxis = {tickfont:{size:11,color:'#6b7591'},showgrid:false,zeroline:false,linecolor:'#252b3b'};
+  profileLayout.yaxis = {range:[0,17],tickfont:{size:11,color:'#6b7591',family:'DM Mono'},gridcolor:'#1e2436',zeroline:false,showline:false,title:{text:'',font:{size:11,color:'#6b7591'}}};
+  profileLayout.annotations = [
+    {x:'Avg Legs<br>Greece',y:8.4,text:'<b>+40%</b> vs avg',showarrow:true,arrowhead:0,arrowcolor:'#4f8ef7',arrowwidth:1,ax:45,ay:-30,font:{size:10,color:'#4f8ef7'},bgcolor:'rgba(30,36,54,0.9)',bordercolor:'#4f8ef7',borderwidth:1,borderpad:4},
+    {x:'Avg Stake (€)<br>Greece',y:14.3,text:'<b>1.7×</b> avg stake',showarrow:true,arrowhead:0,arrowcolor:'#34d399',arrowwidth:1,ax:45,ay:-30,font:{size:10,color:'#34d399'},bgcolor:'rgba(30,36,54,0.9)',bordercolor:'#34d399',borderwidth:1,borderpad:4}
+  ];
+  Plotly.newPlot('exec-chart-profiles', profileTraces, profileLayout, {responsive:true, displayModeBar:false});
 })();
 </script>
 </body>
