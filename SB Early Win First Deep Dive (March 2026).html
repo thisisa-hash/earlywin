@@ -1166,14 +1166,40 @@
 
   <div class="exec-divider"></div>
 
-  <!-- Bettor Profiles Chart -->
+  <!-- Country Comparison Chart -->
   <div class="exec-chart-section">
     <div class="exec-section-header">
-      <div class="exec-section-eyebrow">Bettor Profiles</div>
-      <div class="exec-section-title">Two Distinct User Types: Complexity-Seekers vs Value-Seekers</div>
+      <div class="exec-section-eyebrow">Country Comparison</div>
+      <div class="exec-section-title">Early Win &amp; Cash Out Adoption by Market</div>
     </div>
     <div class="exec-chart-wrap">
-      <div id="exec-chart-profiles" style="width:100%;height:380px;"></div>
+      <div id="exec-chart-adoption" style="width:100%;height:400px;"></div>
+    </div>
+  </div>
+
+  <div class="exec-divider"></div>
+
+  <!-- Bettor Profiles: Legs -->
+  <div class="exec-chart-section">
+    <div class="exec-section-header">
+      <div class="exec-section-eyebrow">Bettor Profiles — Legs</div>
+      <div class="exec-section-title">Average Number of Selections per Bet</div>
+    </div>
+    <div class="exec-chart-wrap">
+      <div id="exec-chart-legs" style="width:100%;height:380px;"></div>
+    </div>
+  </div>
+
+  <div class="exec-divider"></div>
+
+  <!-- Bettor Profiles: Stakes -->
+  <div class="exec-chart-section">
+    <div class="exec-section-header">
+      <div class="exec-section-eyebrow">Bettor Profiles — Stakes</div>
+      <div class="exec-section-title">Average Stake per Bet (&euro;)</div>
+    </div>
+    <div class="exec-chart-wrap">
+      <div id="exec-chart-stakes" style="width:100%;height:380px;"></div>
     </div>
   </div>
 
@@ -2361,49 +2387,118 @@ function switchTab(tab) {
 // EXECUTIVE REPORT CHARTS
 // ══════════════════════════════════════════════
 (function() {
-  var darkLayout = {
+  var darkBase = {
     paper_bgcolor:'#171c27', plot_bgcolor:'rgba(0,0,0,0)',
     font:{family:'DM Sans, sans-serif', color:'#8b93ad'},
-    margin:{t:50,b:60,l:70,r:30},
+    margin:{t:50,b:50,l:60,r:30},
     hovermode:'x unified',
     hoverlabel:{bgcolor:'#1e2436',bordercolor:'#252b3b',font:{family:'DM Sans',size:12,color:'#e8ecf4'}},
-    legend:{orientation:'h',x:0.5,y:1.12,xanchor:'center',font:{size:11,color:'#c8d0e8'},bgcolor:'rgba(0,0,0,0)'}
+    legend:{orientation:'h',x:0.5,y:1.12,xanchor:'center',font:{size:11,color:'#c8d0e8'},bgcolor:'rgba(0,0,0,0)'},
+    xaxis:{tickfont:{size:11,color:'#6b7591'},showgrid:false,zeroline:false,linecolor:'#252b3b'},
+    yaxis:{tickfont:{size:11,color:'#6b7591',family:'DM Mono'},gridcolor:'#1e2436',zeroline:false,showline:false}
   };
+  function dl(overrides) {
+    var l = JSON.parse(JSON.stringify(darkBase));
+    for (var k in overrides) l[k] = overrides[k];
+    return l;
+  }
 
-  // Bettor profiles chart: Legs vs Stakes comparison (Greece & Brazil, Non-VIP)
-  var categories = ['Avg Legs<br>Greece','Avg Legs<br>Brazil','Avg Stake (€)<br>Greece','Avg Stake (€)<br>Brazil'];
-  var allBets  = [6.0, 7.2, 8.3, 4.3];
-  var ewBets   = [8.4, 9.7, 7.5, 4.3];
-  var coBets   = [5.5, 6.5, 14.3, 7.3];
+  // ── 1. Country Comparison: Adoption ──
+  var countries = ['Greece','Brazil','Mexico','Chile','Ecuador','Ireland'];
+  var nvEw  = [0.060, 0.034, 0.107, 0.078, 0.089, 0.037];
+  var nvCo  = [0.159, 0.181, 0.215, 0.210, 0.230, 0.102];
+  var vipEw = [0.102, 0.089, 0.194, 0.149, 0.130, 0.096];
+  var vipCo = [0.363, 0.459, 0.403, 0.420, 0.372, 0.278];
+  function pct(v){return (v*100).toFixed(1)+'%';}
+  Plotly.newPlot('exec-chart-adoption', [
+    {name:'Early Win Non-VIP', type:'bar', x:countries, y:nvEw, marker:{color:'rgba(79,142,247,0.45)',line:{color:'#4f8ef7',width:1}},
+     text:nvEw.map(pct), textposition:'outside', textfont:{size:10,color:'#4f8ef7',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Early Win Non-VIP: %{y:.1%}<extra></extra>'},
+    {name:'Early Win VIP', type:'bar', x:countries, y:vipEw, marker:{color:'#4f8ef7',line:{width:0}},
+     text:vipEw.map(pct), textposition:'outside', textfont:{size:10,color:'#4f8ef7',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Early Win VIP: %{y:.1%}<extra></extra>'},
+    {name:'Cash Out Non-VIP', type:'bar', x:countries, y:nvCo, marker:{color:'rgba(52,211,153,0.45)',line:{color:'#34d399',width:1}},
+     text:nvCo.map(pct), textposition:'outside', textfont:{size:10,color:'#34d399',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Cash Out Non-VIP: %{y:.1%}<extra></extra>'},
+    {name:'Cash Out VIP', type:'bar', x:countries, y:vipCo, marker:{color:'#34d399',line:{width:0}},
+     text:vipCo.map(pct), textposition:'outside', textfont:{size:10,color:'#34d399',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Cash Out VIP: %{y:.1%}<extra></extra>'}
+  ], dl({barmode:'group',bargap:0.25,bargroupgap:0.08,yaxis:{tickformat:'.0%',dtick:0.1,range:[0,0.55],tickfont:{size:11,color:'#6b7591',family:'DM Mono'},gridcolor:'#1e2436',zeroline:false,showline:false}}),
+  {responsive:true, displayModeBar:false});
 
-  var profileTraces = [
-    {name:'All Bets', type:'bar', x:categories, y:allBets,
-     marker:{color:'#a78bfa', opacity:0.7},
-     text:['6.0','7.2','€8.3','€4.3'], textposition:'outside',
-     textfont:{size:11,color:'#a78bfa',family:'DM Mono'},cliponaxis:false,
-     hovertemplate:'All Bets: %{y}<extra></extra>'},
-    {name:'Early Win Bets', type:'bar', x:categories, y:ewBets,
-     marker:{color:'#4f8ef7'},
-     text:['8.4','9.7','€7.5','€4.3'], textposition:'outside',
-     textfont:{size:11,color:'#4f8ef7',family:'DM Mono'},cliponaxis:false,
-     hovertemplate:'Early Win Bets: %{y}<extra></extra>'},
-    {name:'Cash Out Bets', type:'bar', x:categories, y:coBets,
-     marker:{color:'#34d399'},
-     text:['5.5','6.5','€14.3','€7.3'], textposition:'outside',
-     textfont:{size:11,color:'#34d399',family:'DM Mono'},cliponaxis:false,
-     hovertemplate:'Cash Out Bets: %{y}<extra></extra>'}
-  ];
-  var profileLayout = JSON.parse(JSON.stringify(darkLayout));
-  profileLayout.barmode = 'group';
-  profileLayout.bargap = 0.3;
-  profileLayout.bargroupgap = 0.1;
-  profileLayout.xaxis = {tickfont:{size:11,color:'#6b7591'},showgrid:false,zeroline:false,linecolor:'#252b3b'};
-  profileLayout.yaxis = {range:[0,17],tickfont:{size:11,color:'#6b7591',family:'DM Mono'},gridcolor:'#1e2436',zeroline:false,showline:false,title:{text:'',font:{size:11,color:'#6b7591'}}};
-  profileLayout.annotations = [
-    {x:'Avg Legs<br>Greece',y:8.4,text:'<b>+40%</b> vs avg',showarrow:true,arrowhead:0,arrowcolor:'#4f8ef7',arrowwidth:1,ax:45,ay:-30,font:{size:10,color:'#4f8ef7'},bgcolor:'rgba(30,36,54,0.9)',bordercolor:'#4f8ef7',borderwidth:1,borderpad:4},
-    {x:'Avg Stake (€)<br>Greece',y:14.3,text:'<b>1.7×</b> avg stake',showarrow:true,arrowhead:0,arrowcolor:'#34d399',arrowwidth:1,ax:45,ay:-30,font:{size:10,color:'#34d399'},bgcolor:'rgba(30,36,54,0.9)',bordercolor:'#34d399',borderwidth:1,borderpad:4}
-  ];
-  Plotly.newPlot('exec-chart-profiles', profileTraces, profileLayout, {responsive:true, displayModeBar:false});
+  // ── 2. Bettor Profiles — Legs (Non-VIP & VIP) ──
+  var legCats = ['Greece','Brazil'];
+  // Non-VIP
+  var nvAllLegs = [6.0, 7.2];
+  var nvEwLegs  = [8.4, 9.7];
+  var nvCoLegs  = [5.5, 6.5];
+  // VIP
+  var vipAllLegs = [5.4, 6.0];
+  var vipEwLegs  = [8.4, 8.9];
+  var vipCoLegs  = [5.1, 5.5];
+
+  Plotly.newPlot('exec-chart-legs', [
+    {name:'All Bets — Non-VIP', type:'bar', x:legCats, y:nvAllLegs, marker:{color:'rgba(167,139,250,0.5)',line:{color:'#a78bfa',width:1}},
+     text:nvAllLegs.map(function(v){return v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#a78bfa',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'All Bets Non-VIP: %{y:.1f} legs<extra></extra>'},
+    {name:'Early Win — Non-VIP', type:'bar', x:legCats, y:nvEwLegs, marker:{color:'rgba(79,142,247,0.5)',line:{color:'#4f8ef7',width:1}},
+     text:nvEwLegs.map(function(v){return v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#4f8ef7',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Early Win Non-VIP: %{y:.1f} legs<extra></extra>'},
+    {name:'Cash Out — Non-VIP', type:'bar', x:legCats, y:nvCoLegs, marker:{color:'rgba(52,211,153,0.5)',line:{color:'#34d399',width:1}},
+     text:nvCoLegs.map(function(v){return v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#34d399',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Cash Out Non-VIP: %{y:.1f} legs<extra></extra>'},
+    {name:'All Bets — VIP', type:'bar', x:legCats, y:vipAllLegs, marker:{color:'#a78bfa'},
+     text:vipAllLegs.map(function(v){return v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#a78bfa',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'All Bets VIP: %{y:.1f} legs<extra></extra>'},
+    {name:'Early Win — VIP', type:'bar', x:legCats, y:vipEwLegs, marker:{color:'#4f8ef7'},
+     text:vipEwLegs.map(function(v){return v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#4f8ef7',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Early Win VIP: %{y:.1f} legs<extra></extra>'},
+    {name:'Cash Out — VIP', type:'bar', x:legCats, y:vipCoLegs, marker:{color:'#34d399'},
+     text:vipCoLegs.map(function(v){return v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#34d399',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Cash Out VIP: %{y:.1f} legs<extra></extra>'}
+  ], dl({barmode:'group',bargap:0.3,bargroupgap:0.08,yaxis:{range:[0,12],dtick:2,tickfont:{size:11,color:'#6b7591',family:'DM Mono'},gridcolor:'#1e2436',zeroline:false,showline:false},
+    annotations:[
+      {x:'Greece',y:9.7*0.5+8.4*0.5,text:'Early Win bets have<br><b>35–55% more legs</b>',showarrow:false,
+       font:{size:10,color:'#4f8ef7'},yshift:80,bgcolor:'rgba(30,36,54,0.9)',bordercolor:'#4f8ef7',borderwidth:1,borderpad:5}
+    ]}),
+  {responsive:true, displayModeBar:false});
+
+  // ── 3. Bettor Profiles — Stakes (Non-VIP & VIP) ──
+  var stakeCats = ['Greece','Brazil'];
+  // Non-VIP
+  var nvAllStake = [8.3, 4.3];
+  var nvEwStake  = [7.5, 4.3];
+  var nvCoStake  = [14.3, 7.3];
+  // VIP
+  var vipAllStake = [32.0, 18.5];
+  var vipEwStake  = [38.0, 25.6];
+  var vipCoStake  = [52.6, 30.2];
+
+  Plotly.newPlot('exec-chart-stakes', [
+    {name:'All Bets — Non-VIP', type:'bar', x:stakeCats, y:nvAllStake, marker:{color:'rgba(167,139,250,0.5)',line:{color:'#a78bfa',width:1}},
+     text:nvAllStake.map(function(v){return '\u20AC'+v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#a78bfa',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'All Bets Non-VIP: \u20AC%{y:.1f}<extra></extra>'},
+    {name:'Early Win — Non-VIP', type:'bar', x:stakeCats, y:nvEwStake, marker:{color:'rgba(79,142,247,0.5)',line:{color:'#4f8ef7',width:1}},
+     text:nvEwStake.map(function(v){return '\u20AC'+v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#4f8ef7',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Early Win Non-VIP: \u20AC%{y:.1f}<extra></extra>'},
+    {name:'Cash Out — Non-VIP', type:'bar', x:stakeCats, y:nvCoStake, marker:{color:'rgba(52,211,153,0.5)',line:{color:'#34d399',width:1}},
+     text:nvCoStake.map(function(v){return '\u20AC'+v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#34d399',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Cash Out Non-VIP: \u20AC%{y:.1f}<extra></extra>'},
+    {name:'All Bets — VIP', type:'bar', x:stakeCats, y:vipAllStake, marker:{color:'#a78bfa'},
+     text:vipAllStake.map(function(v){return '\u20AC'+v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#a78bfa',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'All Bets VIP: \u20AC%{y:.1f}<extra></extra>'},
+    {name:'Early Win — VIP', type:'bar', x:stakeCats, y:vipEwStake, marker:{color:'#4f8ef7'},
+     text:vipEwStake.map(function(v){return '\u20AC'+v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#4f8ef7',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Early Win VIP: \u20AC%{y:.1f}<extra></extra>'},
+    {name:'Cash Out — VIP', type:'bar', x:stakeCats, y:vipCoStake, marker:{color:'#34d399'},
+     text:vipCoStake.map(function(v){return '\u20AC'+v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#34d399',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Cash Out VIP: \u20AC%{y:.1f}<extra></extra>'}
+  ], dl({barmode:'group',bargap:0.3,bargroupgap:0.08,yaxis:{range:[0,62],dtick:10,tickprefix:'\u20AC',tickfont:{size:11,color:'#6b7591',family:'DM Mono'},gridcolor:'#1e2436',zeroline:false,showline:false},
+    annotations:[
+      {x:'Greece',y:52.6,text:'VIP Cash Out<br><b>\u20AC52.6</b> avg',showarrow:true,arrowhead:0,arrowcolor:'#34d399',arrowwidth:1,ax:50,ay:-30,
+       font:{size:10,color:'#34d399'},bgcolor:'rgba(30,36,54,0.9)',bordercolor:'#34d399',borderwidth:1,borderpad:4}
+    ]}),
+  {responsive:true, displayModeBar:false});
 })();
 </script>
 </body>
