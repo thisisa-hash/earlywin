@@ -196,7 +196,7 @@
       background:linear-gradient(135deg, var(--card-accent, #4f8ef7) -60%, #171c27 60%);
     }
     .exec-kpi-title { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--card-accent, #4f8ef7); }
-    .exec-kpi-subtitle { font-size:10px; color:#6b7591; margin-top:2px; }
+    .exec-kpi-subtitle { font-size:10px; color:#6b7591; margin-top:2px; font-weight:700; }
     .exec-kpi-body { display:flex; align-items:center; justify-content:center; gap:24px; padding:24px 20px 8px; }
     .exec-kpi-col { text-align:center; flex:1; }
     .exec-kpi-value { font-family:'DM Mono',monospace; font-size:36px; font-weight:600; line-height:1; }
@@ -1056,7 +1056,7 @@
     <div class="exec-kpi-card" style="--card-accent:#34d399">
       <div class="exec-kpi-header">
         <div class="exec-kpi-title">Cash Out Adoption</div>
-        <div class="exec-kpi-subtitle">Weekly avg &middot; All Markets &middot; Untapped opportunity highlighted</div>
+        <div class="exec-kpi-subtitle">Weekly avg &middot; All Markets</div>
       </div>
       <div class="exec-kpi-body">
         <div class="exec-kpi-col">
@@ -1072,7 +1072,7 @@
         </div>
       </div>
       <div class="exec-kpi-footer">
-        <span class="exec-kpi-badge danger">Untapped: ~85% of Cash Out users have never tried Early Win</span>
+        <span class="exec-kpi-badge danger">Untapped: &gt;80% of Cash Out users haven&rsquo;t tried Early Win, on a weekly basis</span>
       </div>
     </div>
 
@@ -1148,15 +1148,42 @@
         <div class="exec-kpi-title">Staking Behaviour — Avg Stake</div>
         <div class="exec-kpi-subtitle">VIP &middot; All Bet Types &middot; Greece &amp; Brazil</div>
       </div>
-      <div class="exec-kpi-body">
-        <div class="exec-kpi-col">
-          <div class="exec-kpi-value nonvip" style="font-size:28px">&euro;32.0 / &euro;18.5</div>
-          <div class="exec-kpi-label">All Bets (GR / BR)</div>
+      <div class="exec-kpi-body" style="flex-direction:column;gap:14px;padding:16px 20px 8px;">
+        <!-- Column headers -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:20px;width:100%;">
+          <div style="text-align:center;flex:1;">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#6b7591;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">All Bets</div>
+          </div>
+          <div style="width:28px;"></div>
+          <div style="text-align:center;flex:1;">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#fb923c;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Early Win</div>
+          </div>
         </div>
-        <div class="exec-kpi-vs">vs</div>
-        <div class="exec-kpi-col">
-          <div class="exec-kpi-value vip" style="font-size:28px;color:#fb923c">&euro;38.0 / &euro;25.6</div>
-          <div class="exec-kpi-label">Early Win (GR / BR)</div>
+        <!-- Greece row -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:20px;width:100%;">
+          <div style="text-align:center;flex:1;">
+            <div style="font-family:'DM Mono',monospace;font-size:28px;font-weight:600;color:#6b7591;line-height:1;">&euro;32.0</div>
+          </div>
+          <div style="font-size:11px;color:#3a4461;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">vs</div>
+          <div style="text-align:center;flex:1;">
+            <div style="font-family:'DM Mono',monospace;font-size:28px;font-weight:600;color:#fb923c;line-height:1;">&euro;38.0</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:-8px;">
+          <span style="font-size:10px;color:#6b7591;text-transform:uppercase;letter-spacing:.06em;">Greece &middot; <span style="color:#fb923c;font-weight:600;">+19%</span></span>
+        </div>
+        <!-- Brazil row -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:20px;width:100%;margin-top:4px;">
+          <div style="text-align:center;flex:1;">
+            <div style="font-family:'DM Mono',monospace;font-size:28px;font-weight:600;color:#6b7591;line-height:1;">&euro;18.5</div>
+          </div>
+          <div style="font-size:11px;color:#3a4461;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">vs</div>
+          <div style="text-align:center;flex:1;">
+            <div style="font-family:'DM Mono',monospace;font-size:28px;font-weight:600;color:#fb923c;line-height:1;">&euro;25.6</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:-8px;">
+          <span style="font-size:10px;color:#6b7591;text-transform:uppercase;letter-spacing:.06em;">Brazil &middot; <span style="color:#fb923c;font-weight:600;">+38%</span></span>
         </div>
       </div>
       <div class="exec-kpi-footer">
