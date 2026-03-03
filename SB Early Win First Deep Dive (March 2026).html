@@ -193,7 +193,7 @@
     .stake-bracket-info { position:absolute; text-align:center; width:38px; }
     .stake-bracket-flag { font-size:9px; color:#6b7591; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
     .stake-bracket-label { font-size:7px; color:#4a5270; font-weight:600; text-transform:uppercase; letter-spacing:.06em; }
-    .stake-bracket-value { font-family:'DM Mono',monospace; font-size:12px; font-weight:700; color:#34d399; }
+    .stake-bracket-value { position:absolute; text-align:center; font-family:'DM Mono',monospace; font-size:12px; font-weight:700; color:#34d399; }
     .exec-kpi-card {
       background:#171c27; border:1px solid #252b3b; border-radius:14px; overflow:hidden;
       transition:all .2s ease; position:relative;
@@ -1237,17 +1237,17 @@
     <div class="stake-brackets">
       <!-- GR bracket -->
       <div class="stake-bracket-bar" style="left:0;top:26%;bottom:22%;"></div>
-      <div class="stake-bracket-info" style="left:0;bottom:calc(22% - 50px);">
+      <div class="stake-bracket-value" style="left:0;top:calc(26% - 18px);width:38px;">+&euro;0.08</div>
+      <div class="stake-bracket-info" style="left:0;bottom:calc(22% - 36px);">
         <div class="stake-bracket-flag">GR</div>
         <div class="stake-bracket-label">Combined</div>
-        <div class="stake-bracket-value">+&euro;0.08</div>
       </div>
       <!-- BR bracket -->
       <div class="stake-bracket-bar" style="left:44px;top:33%;bottom:15%;"></div>
-      <div class="stake-bracket-info" style="left:44px;bottom:calc(15% - 50px);">
+      <div class="stake-bracket-value" style="left:44px;top:calc(33% - 18px);width:38px;">+&euro;1.56</div>
+      <div class="stake-bracket-info" style="left:44px;bottom:calc(15% - 36px);">
         <div class="stake-bracket-flag">BR</div>
         <div class="stake-bracket-label">Combined</div>
-        <div class="stake-bracket-value">+&euro;1.56</div>
       </div>
     </div>
 
