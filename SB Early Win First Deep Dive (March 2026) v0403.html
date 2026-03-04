@@ -1,0 +1,2626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Early Win & Cash Out — Feature Rate & Stakes/Legs</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.plot.ly/plotly-3.3.1.min.js"></script>
+  <script>/* Plotly loaded from CDN above */</script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:#0f1117;font-family:'DM Sans',sans-serif;color:#e8ecf4;padding-bottom:80px}
+    .sticky-top{position:sticky;top:0;z-index:100;background:#0f1117;box-shadow:0 4px 24px rgba(0,0,0,.4)}
+    .page-header{background:#171c27;border-bottom:1px solid #252b3b;padding:6px 48px 5px}
+    .page-eyebrow{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#6b7591;margin-bottom:2px}
+    .page-title{font-size:15px;font-weight:600;color:#e8ecf4;letter-spacing:-.02em}
+    .page-subtitle{font-size:11px;color:#6b7591;margin-top:1px}
+    .country-nav{display:flex;gap:5px;flex-wrap:wrap;padding:5px 48px;background:#0f1117;border-bottom:1px solid #1e2436}
+    .country-nav.hidden{display:none}
+    .country-nav a{font-size:10px;font-weight:500;color:#6b7591;text-decoration:none;padding:3px 9px;border-radius:5px;border:1px solid #252b3b;background:#171c27;transition:all .15s ease}
+    .country-nav a:hover{color:#e8ecf4;border-color:#4f8ef7;background:#1e2436}
+    .country-nav a.nav-summary{}
+    .country-nav a.nav-summary:hover{color:#e8ecf4;border-color:#4f8ef7;background:#1e2436}
+    .tab-content main>div{scroll-margin-top:140px}
+    .country-section{padding:32px 48px 8px}
+    .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:16px;flex-wrap:wrap;padding-right:8px}
+    .country-name{font-size:17px;font-weight:600;color:#e8ecf4;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+    .country-name::before{content:'';display:inline-block;width:3px;height:18px;background:#4f8ef7;border-radius:2px;flex-shrink:0}
+    .summary-name::before{background:#34d399}
+    .chart-wrap{background:#171c27;border:1px solid #252b3b;border-radius:12px;overflow:hidden;padding:8px 8px 4px}
+    .divider{height:1px;background:#1e2436;margin:0 48px}
+    .kpi-picker{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-left:auto;justify-content:flex-end}
+    .kpi-picker-label{font-size:11px;color:#6b7591;font-weight:500;letter-spacing:.05em;text-transform:uppercase;margin-right:2px}
+    .kpi-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:500;padding:4px 10px;border-radius:18px;border:1px solid #252b3b;background:#171c27;color:#6b7591;cursor:pointer;user-select:none;transition:all .18s ease;white-space:nowrap}
+    .kpi-pill:hover{border-color:#4f8ef7;color:#c8d0e8}
+    .kpi-pill.active{color:#fff;border-color:transparent}
+    .kpi-pill.active.color-ew{background:#4f8ef7;box-shadow:0 2px 10px rgba(79,142,247,.35)}
+    .kpi-pill.active.color-co{background:#34d399;box-shadow:0 2px 10px rgba(52,211,153,.35)}
+    .kpi-pill.active.color-p1{background:#a78bfa;box-shadow:0 2px 10px rgba(167,139,250,.35)}
+    .kpi-pill.active.color-p2{background:#fb923c;box-shadow:0 2px 10px rgba(251,146,60,.35)}
+    .kpi-pill.active.color-p3{background:#f472b6;box-shadow:0 2px 10px rgba(244,114,182,.35)}
+    .kpi-pill .pill-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;opacity:.7}
+    .kpi-pill.active .pill-dot{opacity:1;background:#fff}
+    .kpi-max-hint{font-size:11px;color:#4f8ef7;opacity:0;transition:opacity .3s ease;margin-left:6px}
+    .kpi-max-hint.show{opacity:1}
+
+    .sticky-nav-wrap {
+      background:#0f1117; padding:8px 0 6px;
+    }
+    .tab-nav {
+      display:flex; gap:0; justify-content:center; margin:0 auto 0; max-width:740px;
+      background:#131720; border-radius:10px; padding:4px; border:1px solid #252b3b;
+    }
+    .tab-btn {
+      flex:1; padding:6px 18px; border:none; background:transparent; color:#6b7591;
+      font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500;
+      cursor:pointer; border-radius:8px; transition:all .2s;
+      display:flex; flex-direction:column; align-items:center; gap:0px; line-height:1.2;
+    }
+    .tab-sub {
+      font-size:10px; font-weight:400; opacity:0.7;
+    }
+    .tab-btn.active {
+      background:#1e2436; color:#e8ecf4; box-shadow:0 2px 8px rgba(0,0,0,.3);
+    }
+    .tab-btn.active[data-tab="bet"] {
+      border-bottom:2px solid #fb923c; color:#fb923c;
+    }
+    .tab-btn.active[data-tab="sl"] {
+      border-bottom:2px solid #a78bfa; color:#a78bfa;
+    }
+    .tab-btn.active[data-tab="overview"] {
+      border-bottom:2px solid #29A8AC; color:#29A8AC;
+    }
+    .tab-btn.active[data-tab="user"] {
+      border-bottom:2px solid #4f8ef7; color:#4f8ef7;
+    }
+    .tab-btn.active[data-tab="strategy"] {
+      border-bottom:2px solid #22d3ee; color:#22d3ee;
+    }
+    .tab-btn:hover:not(.active) { color:#8b93ad; }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+
+    /* Key Takeaways */
+    .takeaways-panel{margin:12px 0 0;background:#171c27;border:1px solid #252b3b;border-radius:12px;overflow:hidden}
+    .takeaways-header{padding:9px 18px 8px;border-bottom:1px solid #1a2b3d}
+    .takeaways-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#4f8ef7}
+    .takeaways-list{padding:12px 18px 14px;display:flex;flex-direction:column;gap:8px}
+    .takeaway-item{display:flex;align-items:flex-start;gap:10px}
+    .takeaway-bullet{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:6px}
+    .takeaway-bullet.blue{background:#4f8ef7}
+    .takeaway-bullet.green{background:#34d399}
+    .takeaway-bullet.amber{background:#fbbf24}
+    .takeaway-bullet.red{background:#f87171}
+    .takeaway-bullet.purple{background:#a78bfa}
+    .takeaway-text{font-size:13px;color:#8a97b5;line-height:1.55;font-weight:400}
+    .takeaway-text strong{color:#dde3f0;font-weight:600}
+
+    /* Hero / Overview */
+    .hero-section{padding:56px 48px 64px;max-width:960px;margin:0 auto}
+    .hero-eyebrow{font-size:15px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#29A8AC;margin-bottom:12px}
+    .hero-title{font-size:28px;font-weight:700;color:#e8ecf4;letter-spacing:-.03em;line-height:1.2;margin-bottom:10px}
+    .hero-subtitle{font-size:13px;color:#6b7591;line-height:1.6;margin-bottom:44px}
+    .hero-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+    .hero-card{background:#171c27;border:1px solid #252b3b;border-radius:14px;padding:28px 26px 40px;cursor:pointer;transition:all .2s ease;position:relative;overflow:hidden}
+    .hero-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+    .hero-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+    .hero-card[data-target="user"]::before{background:#4f8ef7}
+    .hero-card[data-target="bet"]::before{background:#fb923c}
+    .hero-card[data-target="sl"]::before{background:#a78bfa}
+    .hero-card[data-target="user"]:hover{border-color:#4f8ef7}
+    .hero-card[data-target="bet"]:hover{border-color:#fb923c}
+    .hero-card[data-target="sl"]:hover{border-color:#a78bfa}
+    .hero-card-title{font-size:15px;font-weight:600;color:#e8ecf4;margin-bottom:3px}
+    .hero-card-level{font-size:10px;font-weight:500;color:#6b7591;text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px}
+    .hero-card-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+    .hero-card-list li{font-size:12.5px;color:#8a97b5;line-height:1.5;display:flex;align-items:flex-start;gap:9px}
+    .hero-card-list li::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:6px}
+    .hero-card[data-target="user"] .hero-card-list li::before{background:#4f8ef7}
+    .hero-card[data-target="bet"] .hero-card-list li::before{background:#fb923c}
+    .hero-card[data-target="sl"] .hero-card-list li::before{background:#a78bfa}
+    .hero-card-arrow{position:absolute;bottom:18px;right:20px;font-size:14px;color:#3a4461;transition:color .2s}
+    .hero-card:hover .hero-card-arrow{color:#e8ecf4}
+
+    /* Strategy Tab */
+    .strategy-accent::before{background:#22d3ee !important}
+    .strategy-accent-next::before{background:#34d399 !important}
+    .strategy-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-bottom:24px}
+    @media(max-width:800px){.strategy-grid{grid-template-columns:1fr}}
+    .strategy-grid.compact{grid-template-columns:repeat(3,1fr);gap:12px}
+    @media(max-width:1000px){.strategy-grid.compact{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:600px){.strategy-grid.compact{grid-template-columns:1fr}}
+    .strategy-card{background:#171c27;border:1px solid #252b3b;border-radius:12px;padding:22px 22px 18px;display:flex;gap:16px;transition:all .2s ease;position:relative;overflow:hidden}
+    .strategy-card.compact-card{padding:14px 14px 10px;border-radius:10px;gap:10px}
+    .strategy-card:hover{border-color:#3a4461;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+    .strategy-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#22d3ee,#4f8ef7)}
+    .next-card::before{background:linear-gradient(90deg,#34d399,#22d3ee)}
+    .strategy-card-number{width:32px;height:32px;border-radius:8px;background:#1e2436;border:1px solid #252b3b;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:#22d3ee;flex-shrink:0}
+    .compact-card .strategy-card-number{width:26px;height:26px;font-size:11px;border-radius:6px}
+    .next-num{color:#34d399}
+    .strategy-card-body{flex:1;min-width:0}
+    .strategy-card-title{font-size:14px;font-weight:600;color:#e8ecf4;margin-bottom:6px;line-height:1.35}
+    .strategy-card-desc{font-size:12.5px;color:#8a97b5;line-height:1.55;margin-bottom:10px}
+    .strategy-card-desc strong{color:#dde3f0;font-weight:600}
+    .compact-card .strategy-card-title{font-size:13px;margin-bottom:4px}
+    .compact-card .strategy-card-desc{font-size:11.5px;margin-bottom:8px;line-height:1.45}
+    .compact-card .strategy-tag{font-size:9px;padding:2px 6px}
+    .strategy-tag{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:4px;margin-right:6px}
+    .tag-insight{background:rgba(79,142,247,.15);color:#4f8ef7}
+    .tag-opportunity{background:rgba(34,211,238,.15);color:#22d3ee}
+    .tag-success{background:rgba(52,211,153,.15);color:#34d399}
+    .tag-warning{background:rgba(251,191,36,.15);color:#fbbf24}
+    .tag-action{background:rgba(244,114,182,.15);color:#f472b6}
+
+    /* Executive Summary Sections */
+    .exec-summary{padding:0;margin-bottom:8px}
+    .exec-summary::before{display:none}
+    .exec-summary-eyebrow{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#4f8ef7;margin-bottom:6px}
+    .exec-summary-title{font-size:18px;font-weight:700;color:#e8ecf4;margin-bottom:14px}
+    .exec-findings{display:flex;flex-direction:column;gap:8px}
+    .exec-finding{display:flex;align-items:baseline;gap:10px;font-size:13px;color:#c0c8dc;line-height:1.45}
+    .exec-finding strong{color:#e8ecf4;font-weight:600}
+    .exec-finding .exec-detail{font-size:11px;color:#6b7894;font-weight:400}
+    .exec-num{width:20px;height:20px;border-radius:5px;background:#1e2436;border:1px solid #252b3b;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:#4f8ef7;flex-shrink:0}
+
+    /* Plotly dropdown (updatemenus) dark-theme fix */
+    g.updatemenu-container rect { fill: #1e2436 !important; stroke: #252b3b !important; }
+    g.updatemenu-container text { fill: #e8ecf4 !important; }
+    g.updatemenu-container .updatemenu-item-rect { fill: #1e2436 !important; }
+    g.updatemenu-container g.updatemenu-dropdown-button-group rect { fill: #1e2436 !important; }
+
+    /* Executive Report Tab */
+    .tab-btn.active[data-tab="exec"] {
+      border-bottom:2px solid #fbbf24; color:#fbbf24;
+    }
+    .exec-report { max-width:1200px; margin:0 auto; padding:40px 48px 60px; }
+    .exec-hero { text-align:center; margin-bottom:40px; }
+    .exec-hero-eyebrow { font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#fbbf24; margin-bottom:8px; }
+    .exec-hero-title { font-size:28px; font-weight:700; color:#e8ecf4; letter-spacing:-.03em; line-height:1.2; margin-bottom:6px; }
+    .exec-hero-period { font-size:12px; color:#6b7591; }
+    .exec-divider { height:1px; background:linear-gradient(90deg, transparent, #252b3b, transparent); margin:36px 0; }
+
+    /* KPI Cards Grid */
+    .exec-kpi-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; margin-bottom:8px; }
+    @media(max-width:800px) { .exec-kpi-grid { grid-template-columns:1fr; } }
+    .exec-kpi-bottom { display:grid; grid-template-columns:repeat(2,1fr); grid-template-rows:auto auto; gap:20px; margin-top:20px; margin-bottom:8px; position:relative; }
+    @media(max-width:800px) { .exec-kpi-bottom { grid-template-columns:1fr; } .stake-brackets { display:none; } }
+    .stake-brackets { position:absolute; right:-120px; top:0; bottom:0; width:114px; }
+    .stake-bracket-bar { position:absolute; width:18px; border:2px solid rgba(79,142,247,.4); border-left:none; border-radius:0 6px 6px 0; }
+    .stake-bracket-info { position:absolute; text-align:center; width:38px; }
+    .stake-bracket-flag { font-size:9px; color:#6b7591; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+    .stake-bracket-label { font-size:7px; color:#4a5270; font-weight:600; text-transform:uppercase; letter-spacing:.06em; }
+    .stake-bracket-value { position:absolute; text-align:center; font-family:'DM Mono',monospace; font-size:12px; font-weight:700; color:#34d399; }
+    .exec-kpi-card {
+      background:#171c27; border:1px solid #252b3b; border-radius:14px; overflow:hidden;
+      transition:all .2s ease; position:relative;
+    }
+    .exec-kpi-card:hover { border-color:#3a4461; box-shadow:0 4px 20px rgba(0,0,0,.3); }
+    .exec-kpi-header {
+      padding:14px 20px 10px; border-bottom:1px solid #1e2436;
+      background:linear-gradient(135deg, var(--card-accent, #4f8ef7) -60%, #171c27 60%);
+    }
+    .exec-kpi-title { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--card-accent, #4f8ef7); }
+    .exec-kpi-subtitle { font-size:10px; color:#6b7591; margin-top:2px; font-weight:700; }
+    .exec-kpi-body { display:flex; align-items:center; justify-content:center; gap:24px; padding:24px 20px 8px; }
+    .exec-kpi-col { text-align:center; flex:1; }
+    .exec-kpi-value { font-family:'DM Mono',monospace; font-size:36px; font-weight:600; line-height:1; }
+    .exec-kpi-value.nonvip { color:#6b7591; }
+    .exec-kpi-value.vip { color:var(--card-accent, #4f8ef7); }
+    .exec-kpi-label { font-size:10px; color:#6b7591; text-transform:uppercase; letter-spacing:.06em; margin-top:4px; }
+    .exec-kpi-vs { font-size:12px; color:#3a4461; font-weight:600; letter-spacing:.08em; text-transform:uppercase; flex-shrink:0; }
+    .exec-kpi-footer {
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      padding:10px 20px 14px; font-size:12px; color:#8b93ad;
+    }
+    .exec-kpi-badge {
+      display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600;
+      padding:3px 10px; border-radius:6px; letter-spacing:.02em;
+    }
+    .exec-kpi-badge.positive { background:rgba(52,211,153,.12); color:#34d399; }
+    .exec-kpi-badge.warning { background:rgba(251,191,36,.12); color:#fbbf24; }
+    .exec-kpi-badge.info { background:rgba(79,142,247,.12); color:#4f8ef7; }
+    .exec-kpi-badge.danger { background:rgba(248,113,113,.12); color:#f87171; }
+
+    /* Section headers */
+    .exec-section-header { margin-bottom:20px; }
+    .exec-section-eyebrow { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#fbbf24; margin-bottom:4px; }
+    .exec-section-title { font-size:18px; font-weight:700; color:#e8ecf4; }
+
+    /* Country comparison table */
+    .exec-country-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:8px; }
+    @media(max-width:900px) { .exec-country-grid { grid-template-columns:repeat(2,1fr); } }
+    @media(max-width:600px) { .exec-country-grid { grid-template-columns:1fr; } }
+    .exec-country-card {
+      background:#171c27; border:1px solid #252b3b; border-radius:12px; padding:16px 18px;
+      position:relative; overflow:hidden; transition:all .2s ease;
+    }
+    .exec-country-card:hover { border-color:#3a4461; }
+    .exec-country-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:var(--country-accent, #4f8ef7);
+    }
+    .exec-country-card.highlight { border-color:var(--country-accent, #34d399); }
+    .exec-country-card-name { font-size:14px; font-weight:600; color:#e8ecf4; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+    .exec-country-tag { font-size:9px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:2px 6px; border-radius:4px; }
+    .exec-country-tag.leader { background:rgba(52,211,153,.15); color:#34d399; }
+    .exec-country-tag.opportunity { background:rgba(251,191,36,.15); color:#fbbf24; }
+    .exec-country-tag.watch { background:rgba(248,113,113,.15); color:#f87171; }
+    .exec-metric-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid #1e2436; }
+    .exec-metric-row:last-child { border-bottom:none; }
+    .exec-metric-label { font-size:11px; color:#6b7591; }
+    .exec-metric-vals { display:flex; gap:12px; font-family:'DM Mono',monospace; font-size:12px; }
+    .exec-metric-nv { color:#6b7591; }
+    .exec-metric-vip { color:#e8ecf4; font-weight:500; }
+    .exec-metric-header { display:flex; justify-content:flex-end; gap:12px; margin-bottom:4px; padding:0 0 6px; border-bottom:1px solid #252b3b; }
+    .exec-metric-header span { font-size:9px; text-transform:uppercase; letter-spacing:.08em; color:#4a5270; font-weight:600; }
+
+    /* Findings cards */
+    .exec-finding-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+    @media(max-width:800px) { .exec-finding-grid { grid-template-columns:1fr; } }
+    .exec-finding-card {
+      background:#171c27; border:1px solid #252b3b; border-radius:12px; padding:18px 20px;
+      position:relative; overflow:hidden; transition:all .2s ease;
+    }
+    .exec-finding-card:hover { border-color:#3a4461; }
+    .exec-finding-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    }
+    .exec-finding-card.insight::before { background:#4f8ef7; }
+    .exec-finding-card.opportunity::before { background:#34d399; }
+    .exec-finding-card.warning::before { background:#fbbf24; }
+    .exec-finding-card.action::before { background:#f472b6; }
+    .exec-finding-icon { font-size:11px; font-weight:700; width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; font-family:'DM Mono',monospace; }
+    .exec-finding-card.insight .exec-finding-icon { background:rgba(79,142,247,.15); color:#4f8ef7; }
+    .exec-finding-card.opportunity .exec-finding-icon { background:rgba(52,211,153,.15); color:#34d399; }
+    .exec-finding-card.warning .exec-finding-icon { background:rgba(251,191,36,.15); color:#fbbf24; }
+    .exec-finding-card.action .exec-finding-icon { background:rgba(244,114,182,.15); color:#f472b6; }
+    .exec-finding-card-title { font-size:13px; font-weight:600; color:#e8ecf4; margin-bottom:6px; line-height:1.35; }
+    .exec-finding-card-desc { font-size:12px; color:#8a97b5; line-height:1.55; }
+    .exec-finding-card-desc strong { color:#dde3f0; font-weight:600; }
+
+    /* Chart section in exec */
+    .exec-chart-section { margin-bottom:8px; }
+    .exec-chart-wrap { background:#171c27; border:1px solid #252b3b; border-radius:12px; overflow:hidden; padding:8px 8px 4px; }
+  </style>
+</head>
+<body class="theme-user">
+
+<div class="sticky-top">
+<header class="page-header">
+  <div class="page-eyebrow">NOVIBET · WEEKLY · DEC 2025 – FEB 2026</div>
+  <div class="page-title">Early Win – First Deep Dive</div>
+</header>
+
+<div class="sticky-nav-wrap">
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')">Overview</button>
+    <button class="tab-btn" data-tab="exec" onclick="switchTab('exec')">Executive Report</button>
+    <button class="tab-btn" data-tab="user" onclick="switchTab('user')">Adoption Rate<span class="tab-sub">(User Level)</span></button>
+    <button class="tab-btn" data-tab="bet" onclick="switchTab('bet')">Feature Rate<span class="tab-sub">(Bet Level)</span></button>
+    <button class="tab-btn" data-tab="sl" onclick="switchTab('sl')">Stakes &amp; Legs<span class="tab-sub">(Bet Level)</span></button>
+    <button class="tab-btn" data-tab="strategy" onclick="switchTab('strategy')">What's Next?</button>
+  </nav>
+</div>
+<nav class="country-nav hidden" id="country-nav-overview"></nav>
+<nav class="country-nav hidden" id="country-nav-user"><a href="#Greece">Greece</a><a href="#Brazil">Brazil</a><a href="#Mexico">Mexico</a><a href="#Chile">Chile</a><a href="#Ecuador">Ecuador</a><a href="#Ireland">Ireland</a><a href="#summary" class="nav-summary">All Countries</a></nav>
+<nav class="country-nav hidden" id="country-nav-bet"><a href="#bet-Greece">Greece</a><a href="#bet-Brazil">Brazil</a><a href="#bet-summary" class="nav-summary">All Countries (Only Greece and Brazil)</a></nav>
+<nav class="country-nav hidden" id="country-nav-sl"><a href="#sl-Greece">Greece</a><a href="#sl-Brazil">Brazil</a><a href="#sl-summary" class="nav-summary">All Countries (Only Greece and Brazil)</a></nav>
+<nav class="country-nav hidden" id="country-nav-exec"></nav>
+<nav class="country-nav hidden" id="country-nav-strategy"></nav>
+</div>
+
+<div id="tab-overview" class="tab-content active">
+<div class="hero-section">
+  <div class="hero-eyebrow">Novibet · Weekly · Dec 2025 – Feb 2026</div>
+  <div class="hero-title">Early Win – First Deep Dive</div>
+  <div class="hero-subtitle">An interactive analysis of Early Win and Cash Out feature adoption, bet-level usage, and staking behaviour across countries and VIP segments over an 8-week rolling window.</div>
+
+  <div class="hero-cards">
+
+    <div class="hero-card" data-target="user" onclick="switchTab('user')">
+      <div class="hero-card-title">Adoption Rate</div>
+      <div class="hero-card-level">User Level</div>
+      <ul class="hero-card-list">
+        <li>Share of users (bettors) who used Early Win at least once, during the week</li>
+        <li>Share of users (bettors) who used Cash Out at least once, during the week</li>
+        <li>Feature overlap between Early Win &amp; Cash Out</li>
+        <li>Weekly trend across countries and comparison (Greece, Brazil, Mexico, Chile, Ecuador, Ireland)</li>
+        <li>VIP vs Non-VIP breakdown</li>
+      </ul>
+      <span class="hero-card-arrow">→</span>
+    </div>
+
+    <div class="hero-card" data-target="bet" onclick="switchTab('bet')">
+      <div class="hero-card-title">Feature Rate</div>
+      <div class="hero-card-level">Bet Level</div>
+      <ul class="hero-card-list">
+        <li>How often Early Win and Cash Out are triggered per bet</li>
+        <li>Weekly trend across countries and comparison (Greece, Brazil)</li>
+        <li>Split by bet type (Bet Builder Combo, Multiple, System, All)</li>
+        <li>VIP vs Non-VIP breakdown</li>
+      </ul>
+      <span class="hero-card-arrow">→</span>
+    </div>
+
+    <div class="hero-card" data-target="sl" onclick="switchTab('sl')">
+      <div class="hero-card-title">Stakes &amp; Legs</div>
+      <div class="hero-card-level">Bet Level</div>
+      <ul class="hero-card-list">
+        <li>Average stake for Early Win, Cash Out, and all bets</li>
+        <li>Average leg count by feature and bet type</li>
+        <li>Weekly trend across countries and comparison (Greece, Brazil)</li>
+        <li>VIP vs Non-VIP breakdown</li>
+      </ul>
+      <span class="hero-card-arrow">→</span>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<div id="tab-user" class="tab-content">
+
+<main>
+
+<div id="user-key-findings">
+<section class="country-section">
+  <div class="section-header">
+    <h2 class="country-name">Key Findings</h2>
+  </div>
+  <div class="exec-summary">
+    <div class="exec-findings">
+      <div class="exec-finding"><span class="exec-num">1</span> Cash Out adoption is <strong>2–5×</strong> higher than Early Win across all six markets <span class="exec-detail">(Brazil VIP: Cash Out 46% vs Early Win 9%; Ecuador Non-VIP: 23% vs 8.9%)</span></div>
+      <div class="exec-finding"><span class="exec-num">2</span> Brazil has the largest untapped pool — <strong>39.4%</strong> of VIPs cash out but don't use Early Win <span class="exec-detail">(VIP Cash Out at 46%, only ~14% of Cash Out users have ever tried Early Win)</span></div>
+      <div class="exec-finding"><span class="exec-num">3</span> VIPs adopt Early Win at <strong>~1.5–2.6×</strong> the Non-VIP rate across markets <span class="exec-detail">(Mexico: 19.4% VIP vs 10.7% Non-VIP; Chile: 14.9% vs 7.8%)</span></div>
+      <div class="exec-finding"><span class="exec-num">4</span> Mexico leads with <strong>19.4%</strong> VIP and <strong>10.7%</strong> Non-VIP Early Win adoption — the highest anywhere <span class="exec-detail">(28% of Non-VIP Cash Out users also try Early Win, ~1.8× the cross-market average)</span></div>
+      <div class="exec-finding"><span class="exec-num">5</span> Ireland has the lowest Cash Out adoption of any market, with Non-VIP Early Win at just <strong>3.7%</strong> <span class="exec-detail">(Non-VIP Cash Out 10.2% — the lowest; VIP Cash Out 27.8% — below all other markets' VIP levels)</span></div>
+    </div>
+  </div>
+</section>
+</div>
+<div class="divider"></div>
+
+<div id="Greece">
+  <section class="country-section">
+    <div class="section-header">
+      <h2 class="country-name">Greece</h2>
+      <div class="kpi-picker" id="picker-Greece"></div>
+    </div>
+    <div class="chart-wrap">
+      <div id="chart-Greece" style="width:100%;height:440px;"></div>
+    </div>
+      <div class="takeaways-panel">
+      <div class="takeaways-header"><span class="takeaways-label">Greece — Key Takeaways</span></div>
+      <div class="takeaways-list">
+    <div class="takeaway-item">
+      <div class="takeaway-bullet green"></div>
+      <p class="takeaway-text">
+        <strong>Cash Out dominates; Early Win remains niche.</strong><br>
+        Cash Out adoption is <strong>3–4× higher</strong> than Early Win across both segments.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet amber"></div>
+      <p class="takeaway-text">
+        <strong>Early Win users already know Cash Out — not the reverse.</strong><br>
+        Most Early Win adopters also use Cash Out (<strong>~43%</strong> Non-VIP, <strong>~67%</strong> VIP), but the vast majority of Cash Out users have never tried Early Win.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet purple"></div>
+      <p class="takeaway-text">
+        <strong>VIPs engage more with both features.</strong><br>
+        VIP adoption is roughly <strong>double</strong> Non-VIP for both features, with higher overlap — VIPs are more willing to experiment.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet blue"></div>
+      <p class="takeaway-text">
+        <strong>Biggest growth opportunity: convert Cash Out users to Early Win.</strong><br>
+        Over <strong>80%</strong> of Cash Out users haven't tried Early Win — and they already understand acting on a live bet.
+      </p>
+    </div>
+</div>
+    </div>
+  </section>
+<div class="divider"></div>
+</div>
+
+<div id="Brazil">
+  <section class="country-section">
+    <div class="section-header">
+      <h2 class="country-name">Brazil</h2>
+      <div class="kpi-picker" id="picker-Brazil"></div>
+    </div>
+    <div class="chart-wrap">
+      <div id="chart-Brazil" style="width:100%;height:440px;"></div>
+    </div>
+      <div class="takeaways-panel">
+      <div class="takeaways-header"><span class="takeaways-label">Brazil — Key Takeaways</span></div>
+      <div class="takeaways-list">
+    <div class="takeaway-item">
+      <div class="takeaway-bullet green"></div>
+      <p class="takeaway-text">
+        <strong>Widest Cash Out/Early Win gap of any market — Cash Out is 5× larger.</strong><br>
+        Early Win adoption sits at just <strong>~3.4%</strong> Non-VIP while Cash Out reaches <strong>~18%</strong>; among VIPs, Cash Out hits <strong>~46%</strong> vs Early Win at <strong>~9%</strong>.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet amber"></div>
+      <p class="takeaway-text">
+        <strong>Early Win users know Cash Out, but not the reverse.</strong><br>
+        Over half of Early Win adopters also use Cash Out (<strong>~53%</strong> Non-VIP, <strong>~73%</strong> VIP), yet only <strong>~10%</strong> of Cash Out users have tried Early Win.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet purple"></div>
+      <p class="takeaway-text">
+        <strong>VIPs amplify both features equally — the 5× gap persists.</strong><br>
+        VIP adoption is <strong>~2.5×</strong> Non-VIP for both Early Win and Cash Out, but the ratio between them stays flat, unlike markets where VIPs narrow the gap.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet blue"></div>
+      <p class="takeaway-text">
+        <strong>Largest untapped cross-sell pool: ~16% are Cash Out-only users.</strong><br>
+        Brazil's massive Cash Out base combined with the lowest Early Win penetration makes it the highest-potential market for Early Win conversion campaigns.
+      </p>
+    </div>
+    </div>
+  </section>
+<div class="divider"></div>
+</div>
+
+<div id="Mexico">
+  <section class="country-section">
+    <div class="section-header">
+      <h2 class="country-name">Mexico</h2>
+      <div class="kpi-picker" id="picker-Mexico"></div>
+    </div>
+    <div class="chart-wrap">
+      <div id="chart-Mexico" style="width:100%;height:440px;"></div>
+    </div>
+      <div class="takeaways-panel">
+      <div class="takeaways-header"><span class="takeaways-label">Mexico — Key Takeaways</span></div>
+      <div class="takeaways-list">
+    <div class="takeaway-item">
+      <div class="takeaway-bullet green"></div>
+      <p class="takeaway-text">
+        <strong>Narrowest Cash Out/Early Win gap — Mexico leads Early Win adoption.</strong><br>
+        Cash Out is only <strong>~2× Early Win</strong> here (vs 3–5× elsewhere). Non-VIP Early Win at <strong>~10.7%</strong> and VIP Early Win at <strong>~19.4%</strong> are the highest of any market.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet amber"></div>
+      <p class="takeaway-text">
+        <strong>Strongest feature overlap — users engage with both.</strong><br>
+        <strong>~28%</strong> of Non-VIP Cash Out users also try Early Win (vs ~16% in Greece, ~10% in Brazil). VIP overlap reaches <strong>~13.5%</strong>, the highest anywhere.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet purple"></div>
+      <p class="takeaway-text">
+        <strong>VIPs reach ~19% Early Win adoption — proof the feature can scale.</strong><br>
+        Mexico VIPs show that with the right product-market fit, nearly <strong>1 in 5</strong> users will adopt Early Win alongside Cash Out.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet blue"></div>
+      <p class="takeaway-text">
+        <strong>Mexico is the model market — study what drives higher Early Win uptake.</strong><br>
+        Its unique position (highest Early Win, highest overlap, narrowest gap) suggests product or market factors that other countries should replicate.
+      </p>
+    </div>
+    </div>
+  </section>
+<div class="divider"></div>
+</div>
+
+<div id="Chile">
+  <section class="country-section">
+    <div class="section-header">
+      <h2 class="country-name">Chile</h2>
+      <div class="kpi-picker" id="picker-Chile"></div>
+    </div>
+    <div class="chart-wrap">
+      <div id="chart-Chile" style="width:100%;height:440px;"></div>
+    </div>
+      <div class="takeaways-panel">
+      <div class="takeaways-header"><span class="takeaways-label">Chile — Key Takeaways</span></div>
+      <div class="takeaways-list">
+    <div class="takeaway-item">
+      <div class="takeaway-bullet green"></div>
+      <p class="takeaway-text">
+        <strong>Moderate Cash Out/Early Win ratio (~2.7×) with balanced user split.</strong><br>
+        Non-VIP Early Win sits at <strong>~7.8%</strong> vs Cash Out at <strong>~21%</strong>. Early Win-only (<strong>~3.8%</strong>) and overlap (<strong>~4%</strong>) are nearly equal — a rare balanced split.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet amber"></div>
+      <p class="takeaway-text">
+        <strong>Early Win attracts a distinct user type, not just Cash Out spillover.</strong><br>
+        The near 50/50 split between Early Win-only and overlap users in Non-VIP suggests Early Win appeals to a segment that doesn't naturally gravitate to Cash Out.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet purple"></div>
+      <p class="takeaway-text">
+        <strong>VIP overlap surges — most VIP Early Win users also Cash Out.</strong><br>
+        VIP overlap reaches <strong>~10.9%</strong> (of <strong>~14.9%</strong> Early Win adoption), meaning <strong>~73%</strong> of VIP Early Win users are dual-feature adopters.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet blue"></div>
+      <p class="takeaway-text">
+        <strong>Non-VIP "Early Win-only" cohort is a unique conversion opportunity.</strong><br>
+        Unlike other markets, Chile's Early Win-only users (<strong>~3.8%</strong>) are sizable — introducing them to Cash Out could lift overall engagement.
+      </p>
+    </div>
+    </div>
+  </section>
+<div class="divider"></div>
+</div>
+
+<div id="Ecuador">
+  <section class="country-section">
+    <div class="section-header">
+      <h2 class="country-name">Ecuador</h2>
+      <div class="kpi-picker" id="picker-Ecuador"></div>
+    </div>
+    <div class="chart-wrap">
+      <div id="chart-Ecuador" style="width:100%;height:440px;"></div>
+    </div>
+      <div class="takeaways-panel">
+      <div class="takeaways-header"><span class="takeaways-label">Ecuador — Key Takeaways</span></div>
+      <div class="takeaways-list">
+    <div class="takeaway-item">
+      <div class="takeaway-bullet green"></div>
+      <p class="takeaway-text">
+        <strong>Cash Out/Early Win ratio (~2.6×) mirrors Greece, but at higher absolute rates.</strong><br>
+        Non-VIP Early Win is <strong>~8.9%</strong> and Cash Out is <strong>~23%</strong>; both exceed Greece's levels while maintaining a similar relative gap.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet amber"></div>
+      <p class="takeaway-text">
+        <strong>VIP overlap doesn't scale like other markets.</strong><br>
+        Early Win-to-Cash Out crossover is <strong>~54%</strong> in Non-VIP and <strong>~55%</strong> in VIP — virtually flat, unlike Greece or Brazil where VIPs show a much higher crossover jump.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet purple"></div>
+      <p class="takeaway-text">
+        <strong>Highest "Early Win-Only" VIP share (~5.8%) — some VIPs prefer Early Win exclusively.</strong><br>
+        Ecuador VIPs who use Early Win without Cash Out are notably more common than in other markets, suggesting a distinct user preference.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet blue"></div>
+      <p class="takeaway-text">
+        <strong>Understand what drives exclusive Early Win loyalty among VIPs.</strong><br>
+        Ecuador's unique Early Win-only cohort could reveal product features or betting behaviours that make Early Win independently valuable — insights for other markets.
+      </p>
+    </div>
+    </div>
+  </section>
+<div class="divider"></div>
+</div>
+
+<div id="Ireland">
+  <section class="country-section">
+    <div class="section-header">
+      <h2 class="country-name">Ireland</h2>
+      <div class="kpi-picker" id="picker-Ireland"></div>
+    </div>
+    <div class="chart-wrap">
+      <div id="chart-Ireland" style="width:100%;height:440px;"></div>
+    </div>
+      <div class="takeaways-panel">
+      <div class="takeaways-header"><span class="takeaways-label">Ireland — Key Takeaways</span></div>
+      <div class="takeaways-list">
+    <div class="takeaway-item">
+      <div class="takeaway-bullet green"></div>
+      <p class="takeaway-text">
+        <strong>Lowest adoption for both features — a market penetration challenge.</strong><br>
+        Non-VIP Early Win (<strong>~3.7%</strong>) and Cash Out (<strong>~10.2%</strong>) are the lowest of any country; even VIP Cash Out (<strong>~27.8%</strong>) trails other markets' Non-VIP rates.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet amber"></div>
+      <p class="takeaway-text">
+        <strong>The Cash Out/Early Win ratio (~2.8×) is normal — adoption is low for both, not skewed.</strong><br>
+        Unlike Brazil (5× gap), Ireland's challenge isn't Early Win specifically — it's overall feature engagement across the board.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet purple"></div>
+      <p class="takeaway-text">
+        <strong>VIP crossover behaves like mature markets.</strong><br>
+        <strong>~71%</strong> of VIP Early Win users also Cash Out, on par with Chile and Brazil — VIPs who try Early Win are equally engaged here.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet blue"></div>
+      <p class="takeaway-text">
+        <strong>Priority: drive broader feature awareness before optimising cross-sell.</strong><br>
+        With both features under-penetrated, Ireland needs visibility and education campaigns rather than Early Win-to-Cash Out conversion tactics.
+      </p>
+    </div>
+    </div>
+  </section>
+<div class="divider"></div>
+</div>
+
+
+<div id="summary">
+  <section class="country-section">
+    <div class="section-header">
+      <h2 class="country-name summary-name">All Countries</h2>
+      <div class="kpi-picker" id="picker-summary"></div>
+    </div>
+    <div class="chart-wrap">
+      <div id="chart-summary" style="width:100%;height:440px;"></div>
+    </div>
+
+    <div class="takeaways-panel">
+      <div class="takeaways-header"><span class="takeaways-label">All Countries — Key Takeaways</span></div>
+      <div class="takeaways-list">
+    <div class="takeaway-item">
+      <div class="takeaway-bullet green"></div>
+      <p class="takeaway-text">
+        <strong>Cash Out consistently 2–5× higher than Early Win — the gap is universal.</strong><br>
+        Average Cash Out adoption is <strong>~17%</strong> Non-VIP and <strong>~41%</strong> VIP; Early Win sits at <strong>~5.3%</strong> and <strong>~10.8%</strong> respectively.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet amber"></div>
+      <p class="takeaway-text">
+        <strong>Mexico is the clear standout — narrowest gap, highest Early Win, highest overlap.</strong><br>
+        With Early Win at <strong>~10.7%</strong> Non-VIP and <strong>~19.4%</strong> VIP, Mexico proves the feature can reach meaningful scale; its success factors deserve investigation.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet purple"></div>
+      <p class="takeaway-text">
+        <strong>VIP status doubles adoption but widens the Cash Out/Early Win ratio.</strong><br>
+        The gap grows from <strong>~3.2×</strong> Non-VIP to <strong>~3.8×</strong> VIP on average — VIPs disproportionately favour Cash Out, making Early Win's VIP growth an untapped opportunity.
+      </p>
+    </div>
+    <div class="takeaway-item">
+      <div class="takeaway-bullet blue"></div>
+      <p class="takeaway-text">
+        <strong>Converting just 10% of Cash Out-only users would roughly double Early Win adoption.</strong><br>
+        Cash Out-only users average <strong>~14.5%</strong> Non-VIP and <strong>~33%</strong> VIP — they already understand acting on a live bet, making them the ideal Early Win target.
+      </p>
+    </div>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<div id="tab-bet" class="tab-content">
+<main>
+
+<div id="bet-key-findings">
+<section class="country-section">
+  <div class="section-header">
+    <h2 class="country-name">Key Findings</h2>
+  </div>
+  <div class="exec-summary">
+    <div class="exec-findings">
+      <div class="exec-finding"><span class="exec-num">1</span> Cash Out per-bet rate is <strong>3–6×</strong> higher than Early Win — the user-level gap carries through to bet level <span class="exec-detail">(Greece: 7.0% vs 2.2% Non-VIP; Brazil: 9.2% vs 1.7% Non-VIP)</span></div>
+      <div class="exec-finding"><span class="exec-num">2</span> VIP status lifts Cash Out bet rates but Early Win stays flat at <strong>~1.7%</strong> in both markets <span class="exec-detail">(VIP Cash Out: 7.4% Greece, 10.1% Brazil; VIP Early Win: 1.7% in both)</span></div>
+      <div class="exec-finding"><span class="exec-num">3</span> Early Win per-bet rate is remarkably stable at <strong>~1.3–2.4%</strong> across markets, segments, and core bet types <span class="exec-detail">(excl. low-volume System bets)</span></div>
+      <div class="exec-finding"><span class="exec-num">4</span> Brazil VIP Early Win bet rate grew <strong>+65%</strong> in 8 weeks despite flat user adoption <span class="exec-detail">(VIP BetBuilderCombo Cash Out averages ~11%, while Early Win on the same type sits at just 1.5%)</span></div>
+    </div>
+  </div>
+</section>
+</div>
+<div class="divider"></div>
+
+<div id="bet-Greece">
+  <section class="country-section">
+    <div class="section-header">
+      <h2 class="country-name">Greece</h2>
+      <div class="kpi-picker" id="bet-picker-Greece"></div>
+    </div>
+    <div class="chart-wrap">
+      <div id="bet-chart-Greece" style="width:100%;height:440px;"></div>
+    </div>
+    <div class="takeaways-panel">
+      <div class="takeaways-header"><span class="takeaways-label">Greece — Key Takeaways</span></div>
+      <div class="takeaways-list">
+        <div class="takeaway-item">
+          <div class="takeaway-bullet green"></div>
+          <p class="takeaway-text">
+            <strong>Cash Out bet rate is 3–4× higher than Early Win across all bet types.</strong><br>
+            Overall Cash Out is <strong>~7.0%</strong> Non-VIP and <strong>~7.4%</strong> VIP vs Early Win at <strong>~2.2%</strong> and <strong>~1.7%</strong> respectively.
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet amber"></div>
+          <p class="takeaway-text">
+            <strong>VIPs Cash Out more per bet but use Early Win less.</strong><br>
+            VIP Early Win bet rate (<strong>~1.7%</strong>) is actually <em>lower</em> than Non-VIP (<strong>~2.2%</strong>) — VIP status boosts Cash Out usage at the bet level, not Early Win.
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet purple"></div>
+          <p class="takeaway-text">
+            <strong>System bets have the widest Cash Out/Early Win gap (~5.4× Non-VIP, ~8.5× VIP).</strong><br>
+            System bets reach <strong>~8.6%</strong> Cash Out Non-VIP and <strong>~9.4%</strong> VIP, suggesting complex bet types favour Cash Out disproportionately.
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet blue"></div>
+          <p class="takeaway-text">
+            <strong>Early Win engagement is bet-type agnostic — it doesn't spike for any category.</strong><br>
+            Early Win rates hover at <strong>1.6–2.4%</strong> regardless of bet type, while Cash Out varies more — implying Early Win usage is driven by user behaviour, not bet construction.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="divider"></div>
+</div>
+
+<div id="bet-Brazil">
+  <section class="country-section">
+    <div class="section-header">
+      <h2 class="country-name">Brazil</h2>
+      <div class="kpi-picker" id="bet-picker-Brazil"></div>
+    </div>
+    <div class="chart-wrap">
+      <div id="bet-chart-Brazil" style="width:100%;height:440px;"></div>
+    </div>
+    <div class="takeaways-panel">
+      <div class="takeaways-header"><span class="takeaways-label">Brazil — Key Takeaways</span></div>
+      <div class="takeaways-list">
+        <div class="takeaway-item">
+          <div class="takeaway-bullet green"></div>
+          <p class="takeaway-text">
+            <strong>Steepest Cash Out/Early Win gap at bet level — 5–6× across all views.</strong><br>
+            Non-VIP Cash Out is <strong>~9.2%</strong> vs Early Win at <strong>~1.7%</strong> (~5.4×); VIP Cash Out rises to <strong>~10.1%</strong> while Early Win stays flat at <strong>~1.7%</strong> (~5.9×).
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet amber"></div>
+          <p class="takeaway-text">
+            <strong>Early Win bet rate is identical across VIP and Non-VIP (~1.7%).</strong><br>
+            Unlike user-level adoption (which doubles for VIPs), bet-level Early Win usage is flat — VIPs who adopt Early Win don't apply it to more bets.
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet purple"></div>
+          <p class="takeaway-text">
+            <strong>BetBuilderCombo drives the highest Cash Out rates (~10–11%).</strong><br>
+            Complex combo bets see the steepest Cash Out engagement in both segments, while Early Win is lowest on this type (<strong>~1.3%</strong> Non-VIP).
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet blue"></div>
+          <p class="takeaway-text">
+            <strong>Brazil's Cash Out bet rates exceed Greece by ~30% — higher per-bet engagement.</strong><br>
+            At <strong>9–10%</strong> vs Greece's <strong>7–7.4%</strong>, Brazil's bettors Cash Out more frequently per bet, not just per user, deepening the Early Win gap.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="divider"></div>
+</div>
+
+<div id="bet-summary">
+  <section class="country-section">
+    <div class="section-header">
+      <h2 class="country-name summary-name">All Countries <span style="font-weight:400;font-size:0.7em;color:#fb923c;">(Only Greece and Brazil)</span></h2>
+      <div class="kpi-picker" id="bet-picker-summary"></div>
+    </div>
+    <div class="chart-wrap">
+      <div id="bet-chart-summary" style="width:100%;height:440px;"></div>
+    </div>
+    <div class="takeaways-panel">
+      <div class="takeaways-header"><span class="takeaways-label">All Countries — Key Takeaways</span></div>
+      <div class="takeaways-list">
+        <div class="takeaway-item">
+          <div class="takeaway-bullet green"></div>
+          <p class="takeaway-text">
+            <strong>Cash Out dominates at bet level in both markets — but the gap varies.</strong><br>
+            Greece's Cash Out/Early Win ratio is <strong>~3.2×</strong> while Brazil's is <strong>~5.4×</strong>; Brazil bettors Cash Out more frequently per bet (<strong>9.2% vs 7.0%</strong>).
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet amber"></div>
+          <p class="takeaway-text">
+            <strong>Early Win bet rates are remarkably similar (~1.3–2.4%) despite very different user adoption.</strong><br>
+            User-level adoption diverges (Greece 6% vs Brazil 3.4%), but per-bet Early Win usage converges — adoptive users apply Early Win at similar rates.
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet purple"></div>
+          <p class="takeaway-text">
+            <strong>VIP status lifts Cash Out bet rates but leaves Early Win flat.</strong><br>
+            VIP Cash Out rises to <strong>~7.4%</strong> (Greece) and <strong>~10.1%</strong> (Brazil) vs Non-VIP, while Early Win stays at <strong>~1.7%</strong> in both — the per-bet VIP effect is Cash Out-only.
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet blue"></div>
+          <p class="takeaway-text">
+            <strong>Complex bets amplify Cash Out but not Early Win — bet type matters for Cash Out only.</strong><br>
+            System and BetBuilderCombo show the highest Cash Out rates; Early Win is flat across types, suggesting Early Win triggers are independent of bet complexity.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+</main>
+</div>
+
+<div id="tab-sl" class="tab-content">
+<main>
+
+<div id="sl-key-findings">
+<section class="country-section">
+  <div class="section-header">
+    <h2 class="country-name">Key Findings</h2>
+  </div>
+  <div class="exec-summary">
+    <div class="exec-findings">
+      <div class="exec-finding"><span class="exec-num">1</span> Early Win bets average <strong>8.4–9.7</strong> legs (35–55% more than market average); Cash Out bets carry the highest stakes <span class="exec-detail">(Greece EW: 8.4 legs vs 6.0 avg; Brazil EW: 9.7 legs vs 7.2 avg)</span></div>
+      <div class="exec-finding"><span class="exec-num">2</span> Cash Out is the revenue anchor — Greek VIP Cash Out averages <strong>€52.61</strong> per bet <span class="exec-detail">(Non-VIP Cash Out €14.3 in Greece, €7.3 in Brazil; Early Win trails at €7.5 and €4.3 respectively)</span></div>
+      <div class="exec-finding"><span class="exec-num">3</span> Two bettor profiles: Early Win users build long, lower-stake slips; Cash Out users bet short slips with higher stakes <span class="exec-detail">(Greece Non-VIP: EW €7.5 at 8.4 legs vs CO €14.3 at 5.5 legs)</span></div>
+      <div class="exec-finding"><span class="exec-num">4</span> VIPs stake <strong>~4×</strong> more than Non-VIPs but leg counts stay the same across both segments <span class="exec-detail">(Greece VIP: CO €52.6, EW €38, All €32 — yet leg counts nearly identical to Non-VIP)</span></div>
+      <div class="exec-finding"><span class="exec-num">5</span> BB Combo Early Win produces the longest slips in both markets at <strong>~11–13 legs</strong> <span class="exec-detail">(Brazil BB Combo EW reaches ~13 legs; Greece ~11 legs)</span></div>
+      <div class="exec-finding"><span class="exec-num">6</span> Multiple bets amplify the Cash Out stake premium most — <strong>€15.7</strong> in Greece (<strong>~1.8×</strong> average), <strong>€7.3</strong> in Brazil (<strong>~1.7×</strong>) <span class="exec-detail">(VIP Multiple CO in Greece: €57+, the single highest stake figure observed)</span></div>
+    </div>
+  </div>
+</section>
+</div>
+<div class="divider"></div>
+
+<div id="sl-Greece">
+  <section class="country-section">
+    <div class="section-header">
+      <h2 class="country-name">Greece</h2>
+      <div class="kpi-picker" id="sl-picker-Greece"></div>
+    </div>
+    <div class="chart-wrap">
+      <div id="sl-chart-Greece" style="width:100%;height:440px;"></div>
+    </div>
+    <div class="takeaways-panel">
+      <div class="takeaways-header"><span class="takeaways-label">Greece — Key Takeaways</span></div>
+      <div class="takeaways-list">
+        <div class="takeaway-item">
+          <div class="takeaway-bullet green"></div>
+          <p class="takeaway-text">
+            <strong>Early Win is the long-accumulator feature — ~8.4 legs vs ~6 average.</strong><br>
+            Early Win bets have <strong>~40% more legs</strong> than all bets in both segments, while Cash Out bets are closer to average (~5.5 Non-VIP, ~5.1 VIP).
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet amber"></div>
+          <p class="takeaway-text">
+            <strong>Cash Out captures the big-stake bets — Early Win sits below average.</strong><br>
+            Non-VIP Cash Out stakes are <strong>~€14.3</strong> (~1.7× average), while Early Win stakes (<strong>~€7.5</strong>) are actually <em>below</em> the €8.3 market average.
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet purple"></div>
+          <p class="takeaway-text">
+            <strong>VIPs bet 4× larger but the structural pattern holds.</strong><br>
+            VIP stakes scale up proportionally (Cash Out <strong>~€52.6</strong>, Early Win <strong>~€38</strong>, all <strong>~€32</strong>) while leg counts remain virtually identical to Non-VIP.
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet blue"></div>
+          <p class="takeaway-text">
+            <strong>Early Win appeals to complexity-seekers; Cash Out appeals to value-seekers.</strong><br>
+            Early Win users build longer, lower-stake slips; Cash Out users bet shorter slips with higher stakes — two distinct bettor profiles.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="divider"></div>
+</div>
+
+<div id="sl-Brazil">
+  <section class="country-section">
+    <div class="section-header">
+      <h2 class="country-name">Brazil</h2>
+      <div class="kpi-picker" id="sl-picker-Brazil"></div>
+    </div>
+    <div class="chart-wrap">
+      <div id="sl-chart-Brazil" style="width:100%;height:440px;"></div>
+    </div>
+    <div class="takeaways-panel">
+      <div class="takeaways-header"><span class="takeaways-label">Brazil — Key Takeaways</span></div>
+      <div class="takeaways-list">
+        <div class="takeaway-item">
+          <div class="takeaway-bullet green"></div>
+          <p class="takeaway-text">
+            <strong>Brazil builds longer accumulators than Greece across the board.</strong><br>
+            Early Win bets average <strong>~9.7 legs</strong> (vs Greece ~8.4), all bets <strong>~7.2</strong> (vs ~6.0) — Brazil's market naturally favours more selections per slip.
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet amber"></div>
+          <p class="takeaway-text">
+            <strong>Early Win stakes match the market average — no premium, unlike Cash Out.</strong><br>
+            Non-VIP Early Win stakes (<strong>~€4.3</strong>) sit at parity with the <strong>€4.3</strong> average, while Cash Out stakes (<strong>~€7.3</strong>) are <strong>~1.7×</strong> higher — Cash Out is the "big bet" feature.
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet purple"></div>
+          <p class="takeaway-text">
+            <strong>VIPs play shorter slips but stake ~4× more.</strong><br>
+            VIP Early Win drops to <strong>~8.9 legs</strong> (from ~9.7 Non-VIP) while stakes jump to <strong>~€25.6</strong> — VIPs trade complexity for bigger wagers.
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet blue"></div>
+          <p class="takeaway-text">
+            <strong>Lower nominal stakes than Greece — but the same structural pattern.</strong><br>
+            Brazil's overall stakes are <strong>~50% of Greece's</strong>, yet the Cash Out > Early Win > All hierarchy and VIP multiplier (~4×) are identical across both markets.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="divider"></div>
+</div>
+
+<div id="sl-summary">
+  <section class="country-section">
+    <div class="section-header">
+      <h2 class="country-name summary-name">All Countries <span style="font-weight:400;font-size:0.7em;color:#fb923c;">(Only Greece and Brazil)</span></h2>
+      <div class="kpi-picker" id="sl-picker-summary"></div>
+    </div>
+    <div class="chart-wrap">
+      <div id="sl-chart-summary" style="width:100%;height:440px;"></div>
+    </div>
+    <div class="takeaways-panel">
+      <div class="takeaways-header"><span class="takeaways-label">All Countries — Key Takeaways</span></div>
+      <div class="takeaways-list">
+        <div class="takeaway-item">
+          <div class="takeaway-bullet green"></div>
+          <p class="takeaway-text">
+            <strong>Early Win = long slips, Cash Out = big stakes — the pattern is universal.</strong><br>
+            In both markets, Early Win bets have the most legs (<strong>~8.4–9.7</strong>) while Cash Out bets carry the highest stakes (<strong>~€7.3–14.3</strong> Non-VIP).
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet amber"></div>
+          <p class="takeaway-text">
+            <strong>Brazil builds longer accumulators; Greece bets bigger per slip.</strong><br>
+            Brazil adds <strong>~1.2 more legs</strong> across all categories, but Greece stakes are <strong>~2×</strong> higher — a clear market-level difference in betting style.
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet purple"></div>
+          <p class="takeaway-text">
+            <strong>VIPs shorten slips slightly but stake ~4× more — in both markets.</strong><br>
+            VIP leg counts dip below Non-VIP, but the <strong>~4× VIP stake multiplier</strong> is remarkably consistent across Greece and Brazil.
+          </p>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-bullet blue"></div>
+          <p class="takeaway-text">
+            <strong>Two distinct user profiles emerge: Early Win = complexity-seeker, Cash Out = value-seeker.</strong><br>
+            These profiles hold across both markets and segments — Early Win and Cash Out serve fundamentally different bettor needs.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+</main>
+</div>
+
+<div id="tab-exec" class="tab-content">
+<div class="exec-report">
+
+  <!-- Hero -->
+  <div class="exec-hero">
+    <div class="exec-hero-eyebrow">Executive Report</div>
+    <div class="exec-hero-title">Early Win &amp; Cash Out — First Deep Dive</div>
+    <div class="exec-hero-period">Novibet &middot; Dec 8, 2025 – Feb 1, 2026 &middot; 8 Weeks &middot; 6 Markets</div>
+  </div>
+
+  <!-- Top-line KPI Cards -->
+  <div class="exec-kpi-grid">
+
+    <!-- Card 1: Early Win Adoption -->
+    <div class="exec-kpi-card" style="--card-accent:#4f8ef7">
+      <div class="exec-kpi-header">
+        <div class="exec-kpi-title">Early Win Adoption</div>
+        <div class="exec-kpi-subtitle">Weekly avg &middot; All Markets</div>
+      </div>
+      <div class="exec-kpi-body">
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-value nonvip">5.3%</div>
+          <div class="exec-kpi-label">Non-VIP</div>
+        </div>
+        <div class="exec-kpi-vs">vs</div>
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-value vip">10.8%</div>
+          <div class="exec-kpi-label">VIP</div>
+        </div>
+      </div>
+      <div class="exec-kpi-footer">
+        <span class="exec-kpi-badge info">VIP adopts at ~2&times; Non-VIP rate</span>
+      </div>
+    </div>
+
+    <!-- Card 2: Cash Out Adoption (with Untapped Opportunity) -->
+    <div class="exec-kpi-card" style="--card-accent:#34d399">
+      <div class="exec-kpi-header">
+        <div class="exec-kpi-title">Cash Out Adoption</div>
+        <div class="exec-kpi-subtitle">Weekly avg &middot; All Markets</div>
+      </div>
+      <div class="exec-kpi-body">
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-value nonvip">17.1%</div>
+          <div style="font-size:10px;color:#fb923c;margin-top:3px;font-family:'DM Mono',monospace;font-weight:600;">(85% are Cash Out only)</div>
+          <div class="exec-kpi-label">Non-VIP</div>
+        </div>
+        <div class="exec-kpi-vs">vs</div>
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-value vip">40.8%</div>
+          <div style="font-size:10px;color:#fb923c;margin-top:3px;font-family:'DM Mono',monospace;font-weight:600;">(81% are Cash Out only)</div>
+          <div class="exec-kpi-label">VIP</div>
+        </div>
+      </div>
+      <div class="exec-kpi-footer">
+        <span class="exec-kpi-badge danger">Untapped: &gt;80% of Cash Out users haven&rsquo;t tried Early Win, on a weekly basis</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom KPI rows with stake brackets -->
+  <div class="exec-kpi-bottom">
+
+    <!-- Card 3: Bet Complexity — Non-VIP -->
+    <div class="exec-kpi-card" style="--card-accent:#22d3ee;grid-column:1;grid-row:1;">
+      <div class="exec-kpi-header">
+        <div class="exec-kpi-title">Bet Complexity — Avg Legs</div>
+        <div class="exec-kpi-subtitle">Non-VIP &middot; All Bet Types &middot; Greece &amp; Brazil</div>
+      </div>
+      <div class="exec-kpi-body">
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-label" style="margin-bottom:8px;">All Bets</div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#6b7591;">6.0</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">GR</span>
+          </div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:4px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#6b7591;">7.2</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">BR</span>
+          </div>
+        </div>
+        <div class="exec-kpi-vs">vs</div>
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-label" style="margin-bottom:8px;color:#22d3ee;">Early Win</div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#22d3ee;">8.4</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">GR</span>
+          </div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:4px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#22d3ee;">9.7</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">BR</span>
+          </div>
+        </div>
+      </div>
+      <div class="exec-kpi-footer">
+        <span class="exec-kpi-badge info">Non-VIP Early Win bets have ~35&ndash;40% more legs</span>
+      </div>
+    </div>
+
+    <!-- Card 4: Staking — Non-VIP -->
+    <div class="exec-kpi-card" style="--card-accent:#f472b6;grid-column:2;grid-row:1;">
+      <div class="exec-kpi-header">
+        <div class="exec-kpi-title">Staking Behaviour — Avg Stake</div>
+        <div class="exec-kpi-subtitle">Non-VIP &middot; All Bet Types &middot; Greece &amp; Brazil</div>
+      </div>
+      <div class="exec-kpi-body">
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-label" style="margin-bottom:8px;">All Bets</div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#6b7591;">&euro;8.3</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">GR</span>
+          </div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:4px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#6b7591;">&euro;4.3</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">BR</span>
+          </div>
+        </div>
+        <div class="exec-kpi-vs">vs</div>
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-label" style="margin-bottom:8px;color:#f472b6;">Early Win</div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#f472b6;">&euro;7.5</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">GR</span>
+          </div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:4px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#f472b6;">&euro;4.3</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">BR</span>
+          </div>
+        </div>
+      </div>
+      <div class="exec-kpi-footer">
+        <span class="exec-kpi-badge warning">Non-VIP Early Win stakes align with or slightly below average</span>
+      </div>
+    </div>
+
+    <!-- Card 5: Bet Complexity — VIP -->
+    <div class="exec-kpi-card" style="--card-accent:#a78bfa;grid-column:1;grid-row:2;">
+      <div class="exec-kpi-header">
+        <div class="exec-kpi-title">Bet Complexity — Avg Legs</div>
+        <div class="exec-kpi-subtitle">VIP &middot; All Bet Types &middot; Greece &amp; Brazil</div>
+      </div>
+      <div class="exec-kpi-body">
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-label" style="margin-bottom:8px;">All Bets</div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#6b7591;">5.4</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">GR</span>
+          </div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:4px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#6b7591;">6.0</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">BR</span>
+          </div>
+        </div>
+        <div class="exec-kpi-vs">vs</div>
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-label" style="margin-bottom:8px;color:#a78bfa;">Early Win</div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#a78bfa;">8.4</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">GR</span>
+          </div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:4px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#a78bfa;">8.9</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">BR</span>
+          </div>
+        </div>
+      </div>
+      <div class="exec-kpi-footer">
+        <span class="exec-kpi-badge info">VIP Early Win bets have ~48&ndash;56% more legs</span>
+      </div>
+    </div>
+
+    <!-- Card 6: Staking — VIP -->
+    <div class="exec-kpi-card" style="--card-accent:#fb923c;grid-column:2;grid-row:2;">
+      <div class="exec-kpi-header">
+        <div class="exec-kpi-title">Staking Behaviour — Avg Stake</div>
+        <div class="exec-kpi-subtitle">VIP &middot; All Bet Types &middot; Greece &amp; Brazil</div>
+      </div>
+      <div class="exec-kpi-body">
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-label" style="margin-bottom:8px;">All Bets</div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#6b7591;">&euro;32.0</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">GR</span>
+          </div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:4px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#6b7591;">&euro;18.5</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">BR</span>
+          </div>
+        </div>
+        <div class="exec-kpi-vs">vs</div>
+        <div class="exec-kpi-col">
+          <div class="exec-kpi-label" style="margin-bottom:8px;color:#fb923c;">Early Win</div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#fb923c;">&euro;38.0</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">GR</span>
+          </div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:4px;">
+            <span style="font-family:'DM Mono',monospace;font-size:24px;font-weight:600;color:#fb923c;">&euro;25.6</span>
+            <span style="font-size:9px;color:#4a5270;text-transform:uppercase;letter-spacing:.06em;">BR</span>
+          </div>
+        </div>
+      </div>
+      <div class="exec-kpi-footer">
+        <span class="exec-kpi-badge warning">VIP Early Win bettors stake 19&ndash;38% more than average</span>
+      </div>
+    </div>
+
+    <!-- Stake brackets: Combined uplift -->
+    <div class="stake-brackets">
+      <!-- GR bracket -->
+      <div class="stake-bracket-value" style="left:22px;top:36%;transform:translateY(-100%);">+&euro;0.08</div>
+      <div class="stake-bracket-bar" style="left:0;top:36%;bottom:27%;"></div>
+      <div class="stake-bracket-info" style="left:0;bottom:calc(27% - 32px);">
+        <div class="stake-bracket-flag">GR</div>
+        <div class="stake-bracket-label">Combined</div>
+      </div>
+      <!-- BR bracket -->
+      <div class="stake-bracket-value" style="left:66px;top:43%;transform:translateY(-100%);">+&euro;1.56</div>
+      <div class="stake-bracket-bar" style="left:44px;top:43%;bottom:20%;"></div>
+      <div class="stake-bracket-info" style="left:44px;bottom:calc(20% - 32px);">
+        <div class="stake-bracket-flag">BR</div>
+        <div class="stake-bracket-label">Combined</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="exec-divider"></div>
+
+  <!-- Country Comparison Chart -->
+  <div class="exec-chart-section">
+    <div class="exec-section-header">
+      <div class="exec-section-eyebrow">Country Comparison</div>
+      <div class="exec-section-title">Early Win &amp; Cash Out Adoption by Market</div>
+    </div>
+    <div class="exec-chart-wrap">
+      <div id="exec-chart-adoption" style="width:100%;height:400px;"></div>
+    </div>
+  </div>
+
+  <div class="exec-divider"></div>
+
+  <!-- Bettor Profiles: Legs -->
+  <div class="exec-chart-section">
+    <div class="exec-section-header">
+      <div class="exec-section-eyebrow">Bettor Profiles — Legs <span style="display:inline-block;margin-left:8px;padding:2px 10px;font-size:11px;font-weight:500;color:#fbbf24;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);border-radius:20px;vertical-align:middle;">Greece &amp; Brazil only</span></div>
+      <div class="exec-section-title">Average Number of Selections per Bet</div>
+    </div>
+    <div class="exec-chart-wrap">
+      <div id="exec-chart-legs" style="width:100%;height:380px;"></div>
+    </div>
+  </div>
+
+  <div class="exec-divider"></div>
+
+  <!-- Bettor Profiles: Stakes -->
+  <div class="exec-chart-section">
+    <div class="exec-section-header">
+      <div class="exec-section-eyebrow">Bettor Profiles — Stakes <span style="display:inline-block;margin-left:8px;padding:2px 10px;font-size:11px;font-weight:500;color:#fbbf24;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);border-radius:20px;vertical-align:middle;">Greece &amp; Brazil only</span></div>
+      <div class="exec-section-title">Average Stake per Bet (&euro;)</div>
+    </div>
+    <div class="exec-chart-wrap">
+      <div id="exec-chart-stakes" style="width:100%;height:380px;"></div>
+    </div>
+  </div>
+
+  <div class="exec-divider"></div>
+
+  <!-- Country Performance Cards -->
+  <div class="exec-section-header">
+    <div class="exec-section-eyebrow">Market Performance</div>
+    <div class="exec-section-title">Per-Country Breakdown</div>
+  </div>
+  <div class="exec-country-grid">
+
+    <!-- Greece -->
+    <div class="exec-country-card" style="--country-accent:#4f8ef7">
+      <div class="exec-country-card-name">Greece</div>
+      <div class="exec-metric-header"><span>Non-VIP</span><span>VIP</span></div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Early Win Adoption</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">6.0%</span><span class="exec-metric-vip">10.2%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out Adoption</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">15.9%</span><span class="exec-metric-vip">36.3%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Both Features</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">2.6%</span><span class="exec-metric-vip">6.7%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out Only</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">13.3%</span><span class="exec-metric-vip">29.6%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out / Early Win Ratio</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">2.7&times;</span><span class="exec-metric-vip">3.6&times;</span></div>
+      </div>
+      <div class="exec-metric-row" style="margin-top:12px">
+        <span class="exec-metric-label">Avg Legs (All Bets) <span style="font-size:8px;color:#3a4461;font-weight:400;font-style:italic;">where Early Win is applicable</span></span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">6.0</span><span class="exec-metric-vip">5.4</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Avg Legs (Early Win)</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">8.4</span><span class="exec-metric-vip">8.4</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Avg Legs (Cash Out)</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">5.5</span><span class="exec-metric-vip">5.1</span></div>
+      </div>
+      <div class="exec-metric-row" style="margin-top:8px">
+        <span class="exec-metric-label">Avg Stake (All Bets) <span style="font-size:8px;color:#3a4461;font-weight:400;font-style:italic;">where Early Win is applicable</span></span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">&euro;8.3</span><span class="exec-metric-vip">&euro;32.0</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Avg Stake (Early Win)</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">&euro;7.5</span><span class="exec-metric-vip">&euro;38.0</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Avg Stake (Cash Out)</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">&euro;14.3</span><span class="exec-metric-vip">&euro;52.6</span></div>
+      </div>
+    </div>
+
+    <!-- Brazil -->
+    <div class="exec-country-card highlight" style="--country-accent:#fbbf24">
+      <div class="exec-country-card-name">Brazil <span class="exec-country-tag opportunity">Opportunity</span></div>
+      <div class="exec-metric-header"><span>Non-VIP</span><span>VIP</span></div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Early Win Adoption</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">3.4%</span><span class="exec-metric-vip">8.9%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out Adoption</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">18.1%</span><span class="exec-metric-vip">45.9%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Both Features</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">1.8%</span><span class="exec-metric-vip">6.5%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out Only</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">16.3%</span><span class="exec-metric-vip" style="color:#fbbf24">39.4%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out / Early Win Ratio</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">5.3&times;</span><span class="exec-metric-vip">5.2&times;</span></div>
+      </div>
+      <div class="exec-metric-row" style="margin-top:12px">
+        <span class="exec-metric-label">Avg Legs (All Bets) <span style="font-size:8px;color:#3a4461;font-weight:400;font-style:italic;">where Early Win is applicable</span></span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">7.2</span><span class="exec-metric-vip">6.0</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Avg Legs (Early Win)</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">9.7</span><span class="exec-metric-vip">8.9</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Avg Legs (Cash Out)</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">6.5</span><span class="exec-metric-vip">5.5</span></div>
+      </div>
+      <div class="exec-metric-row" style="margin-top:8px">
+        <span class="exec-metric-label">Avg Stake (All Bets) <span style="font-size:8px;color:#3a4461;font-weight:400;font-style:italic;">where Early Win is applicable</span></span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">&euro;4.3</span><span class="exec-metric-vip">&euro;18.5</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Avg Stake (Early Win)</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">&euro;4.3</span><span class="exec-metric-vip">&euro;25.6</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Avg Stake (Cash Out)</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">&euro;7.3</span><span class="exec-metric-vip">&euro;30.2</span></div>
+      </div>
+    </div>
+
+    <!-- Mexico -->
+    <div class="exec-country-card highlight" style="--country-accent:#34d399">
+      <div class="exec-country-card-name">Mexico <span class="exec-country-tag leader">Leader</span></div>
+      <div class="exec-metric-header"><span>Non-VIP</span><span>VIP</span></div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Early Win Adoption</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">10.7%</span><span class="exec-metric-vip" style="color:#34d399">19.4%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out Adoption</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">21.5%</span><span class="exec-metric-vip">40.3%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Both Features</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">6.0%</span><span class="exec-metric-vip">13.5%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out Only</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">15.5%</span><span class="exec-metric-vip">26.8%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out / Early Win Ratio</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">2.0&times;</span><span class="exec-metric-vip">2.1&times;</span></div>
+      </div>
+    </div>
+
+    <!-- Chile -->
+    <div class="exec-country-card" style="--country-accent:#a78bfa">
+      <div class="exec-country-card-name">Chile</div>
+      <div class="exec-metric-header"><span>Non-VIP</span><span>VIP</span></div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Early Win Adoption</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">7.8%</span><span class="exec-metric-vip">14.9%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out Adoption</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">21.0%</span><span class="exec-metric-vip">42.0%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Both Features</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">4.0%</span><span class="exec-metric-vip">10.9%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out Only</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">17.0%</span><span class="exec-metric-vip">31.1%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out / Early Win Ratio</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">2.7&times;</span><span class="exec-metric-vip">2.8&times;</span></div>
+      </div>
+    </div>
+
+    <!-- Ecuador -->
+    <div class="exec-country-card" style="--country-accent:#fb923c">
+      <div class="exec-country-card-name">Ecuador</div>
+      <div class="exec-metric-header"><span>Non-VIP</span><span>VIP</span></div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Early Win Adoption</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">8.9%</span><span class="exec-metric-vip">13.0%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out Adoption</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">23.0%</span><span class="exec-metric-vip">37.2%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Both Features</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">4.8%</span><span class="exec-metric-vip">7.2%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out Only</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">18.2%</span><span class="exec-metric-vip">30.0%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out / Early Win Ratio</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">2.6&times;</span><span class="exec-metric-vip">2.9&times;</span></div>
+      </div>
+    </div>
+
+    <!-- Ireland -->
+    <div class="exec-country-card highlight" style="--country-accent:#f87171">
+      <div class="exec-country-card-name">Ireland <span class="exec-country-tag watch">Watch</span></div>
+      <div class="exec-metric-header"><span>Non-VIP</span><span>VIP</span></div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Early Win Adoption</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv" style="color:#f87171">3.7%</span><span class="exec-metric-vip">9.6%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out Adoption</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv" style="color:#f87171">10.2%</span><span class="exec-metric-vip">27.8%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Both Features</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">1.9%</span><span class="exec-metric-vip">6.8%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out Only</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">8.3%</span><span class="exec-metric-vip">21.1%</span></div>
+      </div>
+      <div class="exec-metric-row">
+        <span class="exec-metric-label">Cash Out / Early Win Ratio</span>
+        <div class="exec-metric-vals"><span class="exec-metric-nv">2.8&times;</span><span class="exec-metric-vip">2.9&times;</span></div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</div>
+
+<div id="tab-strategy" class="tab-content">
+<main>
+
+<div id="strategy-next" style="scroll-margin-top:140px">
+  <section class="country-section">
+    <div class="section-header">
+      <h2 class="country-name strategy-accent-next">What's Next — Recommended Actions</h2>
+    </div>
+
+    <div class="strategy-grid compact">
+
+      <div class="strategy-card next-card compact-card">
+        <div class="strategy-card-number next-num">A</div>
+        <div class="strategy-card-body">
+          <h3 class="strategy-card-title">Expand Multi-Market Analysis</h3>
+          <p class="strategy-card-desc">Add MX, CL, EC, IE to Feature Rate &amp; Stakes views; extend observation window beyond 8 weeks</p>
+          <span class="strategy-tag tag-insight">MARKET EXPANSION</span><span class="strategy-tag tag-opportunity">TREND ANALYSIS</span>
+        </div>
+      </div>
+
+      <div class="strategy-card next-card compact-card">
+        <div class="strategy-card-number next-num">B</div>
+        <div class="strategy-card-body">
+          <h3 class="strategy-card-title">Track Brazil VIP Bet-Rate Momentum</h3>
+          <p class="strategy-card-desc">BR VIP Early Win bet rate grew +65% in 8 wks; extend window to confirm it's not seasonal</p>
+          <span class="strategy-tag tag-insight">PERFORMANCE TRACKING</span><span class="strategy-tag tag-opportunity">TREND ANALYSIS</span>
+        </div>
+      </div>
+
+      <div class="strategy-card next-card compact-card">
+        <div class="strategy-card-number next-num">C</div>
+        <div class="strategy-card-body">
+          <h3 class="strategy-card-title">Study the Mexico Playbook</h3>
+          <p class="strategy-card-desc">Mexico has 2–3× the Early Win adoption of peers; investigate UI, promos, sport mix and replicate</p>
+          <span class="strategy-tag tag-insight">COMPETITIVE INTEL</span><span class="strategy-tag tag-opportunity">BEST PRACTICE</span>
+        </div>
+      </div>
+
+      <div class="strategy-card next-card compact-card">
+        <div class="strategy-card-number next-num">D</div>
+        <div class="strategy-card-body">
+          <h3 class="strategy-card-title">Investigate Ireland Underperformance</h3>
+          <p class="strategy-card-desc">IE has the lowest Cash Out adoption; audit feature visibility, sport coverage, competition &amp; regulation</p>
+          <span class="strategy-tag tag-warning">MARKET DIAGNOSTICS</span><span class="strategy-tag tag-insight">LOCAL STRATEGY</span>
+        </div>
+      </div>
+
+      <div class="strategy-card next-card compact-card">
+        <div class="strategy-card-number next-num">E</div>
+        <div class="strategy-card-body">
+          <h3 class="strategy-card-title">Brazil VIP Cross-Sell Campaign</h3>
+          <p class="strategy-card-desc">Target the 39.4% of VIPs who cash out but never use Early Win via in-app nudges &amp; CRM</p>
+          <span class="strategy-tag tag-action">CRM STRATEGY</span><span class="strategy-tag tag-success">HIGH IMPACT</span>
+        </div>
+      </div>
+
+      <div class="strategy-card next-card compact-card">
+        <div class="strategy-card-number next-num">F</div>
+        <div class="strategy-card-body">
+          <h3 class="strategy-card-title">VIP-First Rollout Strategy</h3>
+          <p class="strategy-card-desc">VIPs are ~1.5–2.6× more receptive; pilot every new Early Win initiative with VIP segments first</p>
+          <span class="strategy-tag tag-success">CRM STRATEGY</span><span class="strategy-tag tag-opportunity">SEGMENTATION</span>
+        </div>
+      </div>
+
+      <div class="strategy-card next-card compact-card">
+        <div class="strategy-card-number next-num">G</div>
+        <div class="strategy-card-body">
+          <h3 class="strategy-card-title">Position Early Win for Accumulator Builders</h3>
+          <p class="strategy-card-desc">Early Win users build 35–55% more legs; market partial-win protection on multi-leg bets</p>
+          <span class="strategy-tag tag-opportunity">PRODUCT POSITIONING</span><span class="strategy-tag tag-action">GO-TO-MARKET</span>
+        </div>
+      </div>
+
+      <div class="strategy-card next-card compact-card">
+        <div class="strategy-card-number next-num">H</div>
+        <div class="strategy-card-body">
+          <h3 class="strategy-card-title">Protect &amp; Optimise Cash Out Revenue</h3>
+          <p class="strategy-card-desc">Cash Out bets carry highest stakes (€52.61 avg VIP in GR); keep Cash Out frictionless while growing Early Win</p>
+          <span class="strategy-tag tag-warning">REVENUE PROTECTION</span><span class="strategy-tag tag-success">PRICING STRATEGY</span>
+        </div>
+      </div>
+
+      <div class="strategy-card next-card compact-card">
+        <div class="strategy-card-number next-num">I</div>
+        <div class="strategy-card-body">
+          <h3 class="strategy-card-title">Post Early Win Perception</h3>
+          <p class="strategy-card-desc">Run user research to check if "Early Win" name creates a "winning-only" mental model, limiting usage</p>
+          <span class="strategy-tag tag-warning">USER INSIGHTS</span><span class="strategy-tag tag-action">UX OPTIMISATION</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+</main>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// ADOPTION RATE (USER LEVEL) TAB
+// ══════════════════════════════════════════════
+(function() {
+  var weeks        = ["Dec 8\u201314", "Dec 15\u201321", "Dec 22\u201328", "Dec 29\u2013Jan 4", "Jan 5\u201311", "Jan 12\u201318", "Jan 19\u201325", "Jan 26\u2013Feb 1"];
+  var countries    = [{"name": "Greece", "NON VIP": {"ew": [0.08389, 0.06992, 0.03399, 0.03908, 0.06413, 0.06442, 0.07056, 0.05108], "avgEw": "6.0%", "co": [0.2043, 0.18106, 0.1287, 0.11847, 0.19291, 0.15338, 0.16465, 0.13125], "avgCo": "15.9%", "p1": [0.0397, 0.03167, 0.01663, 0.01731, 0.03096, 0.02637, 0.02978, 0.0193], "avgP1": "2.6%", "p2": [0.04418, 0.03824, 0.01737, 0.02177, 0.03317, 0.03806, 0.04078, 0.03178], "avgP2": "3.3%", "p3": [0.1646, 0.14939, 0.11207, 0.10116, 0.16194, 0.12702, 0.13487, 0.11195], "avgP3": "13.3%", "ymax": 0.245}, "VIP": {"ew": [0.12793, 0.10295, 0.06853, 0.08608, 0.10643, 0.10947, 0.11537, 0.09668], "avgEw": "10.2%", "co": [0.42313, 0.38989, 0.30829, 0.32687, 0.40429, 0.36261, 0.37021, 0.31925], "avgCo": "36.3%", "p1": [0.08858, 0.06634, 0.04708, 0.05495, 0.07616, 0.06934, 0.07503, 0.05841], "avgP1": "6.7%", "p2": [0.03935, 0.03661, 0.02144, 0.03112, 0.03027, 0.04013, 0.04034, 0.03827], "avgP2": "3.5%", "p3": [0.33455, 0.32355, 0.26121, 0.27192, 0.32813, 0.29327, 0.29518, 0.26084], "avgP3": "29.6%", "ymax": 0.508}}, {"name": "Brazil", "NON VIP": {"ew": [0.04138, 0.02933, 0.02843, 0.03082, 0.03653, 0.03537, 0.03592, 0.03384], "avgEw": "3.4%", "co": [0.21805, 0.17051, 0.18338, 0.17827, 0.19633, 0.1684, 0.17719, 0.15683], "avgCo": "18.1%", "p1": [0.0254, 0.01651, 0.01609, 0.01684, 0.02009, 0.01709, 0.01899, 0.01573], "avgP1": "1.8%", "p2": [0.01597, 0.01282, 0.01233, 0.01398, 0.01644, 0.01828, 0.01693, 0.01811], "avgP2": "1.6%", "p3": [0.19264, 0.154, 0.16729, 0.16143, 0.17624, 0.15131, 0.1582, 0.1411], "avgP3": "16.3%", "ymax": 0.262}, "VIP": {"ew": [0.10232, 0.07842, 0.07234, 0.07907, 0.0944, 0.09664, 0.0987, 0.08787], "avgEw": "8.9%", "co": [0.51786, 0.45891, 0.44434, 0.43911, 0.47627, 0.45363, 0.45503, 0.42503], "avgCo": "45.9%", "p1": [0.07822, 0.06065, 0.05384, 0.05693, 0.07204, 0.06946, 0.06883, 0.06154], "avgP1": "6.5%", "p2": [0.02411, 0.01777, 0.01849, 0.02214, 0.02236, 0.02717, 0.02987, 0.02632], "avgP2": "2.4%", "p3": [0.43965, 0.39826, 0.3905, 0.38218, 0.40423, 0.38417, 0.3862, 0.36349], "avgP3": "39.4%", "ymax": 0.621}}, {"name": "Mexico", "NON VIP": {"ew": [0.11091, 0.11553, 0.09492, 0.11527, 0.11041, 0.12039, 0.10207, 0.08971], "avgEw": "10.7%", "co": [0.24404, 0.22587, 0.20296, 0.21366, 0.23035, 0.23269, 0.19787, 0.1734], "avgCo": "21.5%", "p1": [0.06874, 0.06374, 0.05573, 0.06161, 0.0658, 0.06706, 0.05574, 0.04528], "avgP1": "6.0%", "p2": [0.04217, 0.0518, 0.03919, 0.05366, 0.04461, 0.05332, 0.04633, 0.04443], "avgP2": "4.7%", "p3": [0.1753, 0.16213, 0.14723, 0.15205, 0.16455, 0.16562, 0.14213, 0.12813], "avgP3": "15.5%", "ymax": 0.293}, "VIP": {"ew": [0.20922, 0.20133, 0.1718, 0.18874, 0.18981, 0.21046, 0.20722, 0.17018], "avgEw": "19.4%", "co": [0.44583, 0.42632, 0.36848, 0.40115, 0.42086, 0.42622, 0.3955, 0.34202], "avgCo": "40.3%", "p1": [0.15193, 0.13766, 0.12737, 0.12988, 0.13523, 0.14874, 0.13854, 0.11419], "avgP1": "13.5%", "p2": [0.05729, 0.06367, 0.04443, 0.05886, 0.05458, 0.06173, 0.06868, 0.05599], "avgP2": "5.8%", "p3": [0.2939, 0.28866, 0.24111, 0.27127, 0.28563, 0.27748, 0.25696, 0.22783], "avgP3": "26.8%", "ymax": 0.535}}, {"name": "Chile", "NON VIP": {"ew": [0.09707, 0.0843, 0.07346, 0.05029, 0.08114, 0.08042, 0.07926, 0.07724], "avgEw": "7.8%", "co": [0.25495, 0.2461, 0.25367, 0.13991, 0.22577, 0.18868, 0.20473, 0.1676], "avgCo": "21.0%", "p1": [0.05432, 0.04525, 0.04178, 0.02626, 0.04379, 0.03653, 0.04015, 0.03165], "avgP1": "4.0%", "p2": [0.04275, 0.03905, 0.03168, 0.02404, 0.03735, 0.04389, 0.0391, 0.0456], "avgP2": "3.8%", "p3": [0.20063, 0.20084, 0.21189, 0.11365, 0.18199, 0.15215, 0.16458, 0.13596], "avgP3": "17.0%", "ymax": 0.306}, "VIP": {"ew": [0.17376, 0.12879, 0.125, 0.12892, 0.14545, 0.16974, 0.17754, 0.14286], "avgEw": "14.9%", "co": [0.4539, 0.39394, 0.42424, 0.4007, 0.44727, 0.41328, 0.4529, 0.37218], "avgCo": "42.0%", "p1": [0.12057, 0.10985, 0.0947, 0.09059, 0.09818, 0.12915, 0.13406, 0.09398], "avgP1": "10.9%", "p2": [0.05319, 0.01894, 0.0303, 0.03833, 0.04727, 0.04059, 0.04348, 0.04887], "avgP2": "4.0%", "p3": [0.33333, 0.28409, 0.32955, 0.3101, 0.34909, 0.28413, 0.31884, 0.2782], "avgP3": "31.1%", "ymax": 0.545}}, {"name": "Ecuador", "NON VIP": {"ew": [0.12733, 0.1031, 0.0354, 0.08376, 0.09246, 0.09507, 0.08733, 0.08408], "avgEw": "8.9%", "co": [0.27612, 0.28979, 0.1425, 0.22688, 0.27035, 0.21403, 0.23752, 0.18412], "avgCo": "23.0%", "p1": [0.07369, 0.06106, 0.02065, 0.04832, 0.04975, 0.04525, 0.04367, 0.03992], "avgP1": "4.8%", "p2": [0.05364, 0.04204, 0.01475, 0.03543, 0.04271, 0.04982, 0.04367, 0.04415], "avgP2": "4.1%", "p3": [0.20243, 0.22873, 0.12185, 0.17855, 0.2206, 0.16878, 0.19386, 0.1442], "avgP3": "18.2%", "ymax": 0.348}, "VIP": {"ew": [0.19307, 0.09662, 0.0995, 0.12435, 0.11917, 0.13, 0.1641, 0.11579], "avgEw": "13.0%", "co": [0.39604, 0.37681, 0.36816, 0.40415, 0.3886, 0.325, 0.42051, 0.3], "avgCo": "37.2%", "p1": [0.10891, 0.04831, 0.05473, 0.05699, 0.07254, 0.055, 0.11795, 0.06316], "avgP1": "7.2%", "p2": [0.08416, 0.04831, 0.04478, 0.06736, 0.04663, 0.075, 0.04615, 0.05263], "avgP2": "5.8%", "p3": [0.28713, 0.3285, 0.31343, 0.34715, 0.31606, 0.27, 0.30256, 0.23684], "avgP3": "30.0%", "ymax": 0.505}}, {"name": "Ireland", "NON VIP": {"ew": [0.06534, 0.03919, 0.01868, 0.04247, 0.04676, 0.02569, 0.03663, 0.02301], "avgEw": "3.7%", "co": [0.15563, 0.1085, 0.07208, 0.11629, 0.12083, 0.06917, 0.10498, 0.06485], "avgCo": "10.2%", "p1": [0.03403, 0.01856, 0.00934, 0.02103, 0.02454, 0.0126, 0.02115, 0.01069], "avgP1": "1.9%", "p2": [0.03131, 0.02063, 0.00934, 0.02144, 0.02222, 0.01309, 0.01548, 0.01232], "avgP2": "1.8%", "p3": [0.1216, 0.08993, 0.06274, 0.09526, 0.0963, 0.05657, 0.08384, 0.05416], "avgP3": "8.3%", "ymax": 0.187}, "VIP": {"ew": [0.1256, 0.1028, 0.076, 0.09048, 0.09845, 0.0837, 0.11962, 0.0722], "avgEw": "9.6%", "co": [0.4058, 0.34112, 0.228, 0.26667, 0.29534, 0.22907, 0.28708, 0.17329], "avgCo": "27.8%", "p1": [0.07729, 0.08879, 0.04, 0.06667, 0.07254, 0.07048, 0.08134, 0.04332], "avgP1": "6.8%", "p2": [0.04831, 0.01402, 0.036, 0.02381, 0.02591, 0.01322, 0.03828, 0.02888], "avgP2": "2.9%", "p3": [0.3285, 0.25234, 0.188, 0.2, 0.2228, 0.15859, 0.20574, 0.12996], "avgP3": "21.1%", "ymax": 0.487}}];
+  var countryLabels= ["Greece", "Brazil", "Mexico", "Chile", "Ecuador", "Ireland"];
+  var summary      = {"NON VIP": {"ew": [0.05761, 0.03409, 0.10682, 0.07648, 0.08199, 0.03367], "co": [0.15582, 0.18087, 0.21386, 0.2062, 0.21903, 0.09378], "avgEw": "5.3%", "avgCo": "17.1%", "p1": [0.02556, 0.01838, 0.06002, 0.03937, 0.04446, 0.01706], "avgP1": "2.6%", "p2": [0.03205, 0.01570, 0.04680, 0.03711, 0.03753, 0.01661], "avgP2": "2.7%", "p3": [0.13026, 0.16248, 0.15384, 0.16683, 0.17457, 0.07672], "avgP3": "14.5%", "ymax": 0.285}, "VIP": {"ew": [0.10104, 0.08885, 0.19335, 0.1492, 0.1303, 0.09457], "co": [0.3618, 0.45892, 0.40243, 0.42014, 0.37255, 0.27252], "avgEw": "10.8%", "avgCo": "40.8%", "p1": [0.06657, 0.06529, 0.13522, 0.10892, 0.07211, 0.06603], "avgP1": "7.5%", "p2": [0.03447, 0.02356, 0.05813, 0.04027, 0.05819, 0.02854], "avgP2": "3.3%", "p3": [0.29522, 0.39364, 0.26721, 0.31121, 0.30044, 0.20649], "avgP3": "33.2%", "ymax": 0.595}};
+  var segs         = ["NON VIP","VIP"];
+
+  var KPI_DEFS = [
+    {
+      id:'ew', label:'Early Win Adoption', colorClass:'color-ew', color:'#4f8ef7',
+      getData: function(d,seg){ return d[seg].ew; },
+      getAvg:  function(d,seg){ return d[seg].avgEw; },
+      getYmax: function(d,seg){ return d[seg].ymax; }
+    },
+    {
+      id:'co', label:'Cash Out Adoption', colorClass:'color-co', color:'#34d399',
+      getData: function(d,seg){ return d[seg].co; },
+      getAvg:  function(d,seg){ return d[seg].avgCo; },
+      getYmax: function(d,seg){ return d[seg].ymax; }
+    },
+    {
+      id:'p1', label:'Early Win and Cash Out Adoption', colorClass:'color-p1', color:'#a78bfa',
+      getData: function(d,seg){ return d[seg].p1 || []; },
+      getAvg:  function(d,seg){ return d[seg].avgP1 || 'n/a'; },
+      getYmax: function(d,seg){ return d[seg].ymax; }
+    },
+    {
+      id:'p2', label:'Early Win Only Adoption (not Cash Out)', colorClass:'color-p2', color:'#fb923c',
+      getData: function(d,seg){ return d[seg].p2 || []; },
+      getAvg:  function(d,seg){ return d[seg].avgP2 || 'n/a'; },
+      getYmax: function(d,seg){ return d[seg].ymax; }
+    },
+    {
+      id:'p3', label:'Cash Out Only Adoption (not Early Win)', colorClass:'color-p3', color:'#f472b6',
+      getData: function(d,seg){ return d[seg].p3 || []; },
+      getAvg:  function(d,seg){ return d[seg].avgP3 || 'n/a'; },
+      getYmax: function(d,seg){ return d[seg].ymax; }
+    }
+  ];
+
+  var MAX_KPIS = 3;
+  var chartStates = {};
+
+  function getState(chartId) {
+    if (!chartStates[chartId]) {
+      chartStates[chartId] = { seg:'NON VIP', activeKpis:['ew','co','p1'], selectionOrder:['ew','co','p1'] };
+    }
+    return chartStates[chartId];
+  }
+
+  function buildTraces(data, xLabels, chartId) {
+    var state  = getState(chartId);
+    var seg    = state.seg;
+    var active = state.activeKpis;
+
+    // Pre-compute CO/EW ratio if both are active
+    var showEw = active.indexOf('ew') !== -1;
+    var showCo = active.indexOf('co') !== -1;
+    var mult = null;
+    if (showEw && showCo) {
+      var ewVals = (data[seg] && data[seg].ew) ? data[seg].ew : xLabels.map(function(){ return null; });
+      var coVals = (data[seg] && data[seg].co) ? data[seg].co : xLabels.map(function(){ return null; });
+      mult = xLabels.map(function(_, i){
+        var ew = ewVals[i];
+        var co = coVals[i];
+        if (ew === null || ew === undefined || ew === 0) return null;
+        if (co === null || co === undefined) return null;
+        return co / ew;
+      });
+    }
+
+    var traces = [];
+    KPI_DEFS.forEach(function(kpi) {
+      var isActive = active.indexOf(kpi.id) !== -1;
+      var vals = kpi.getData(data, seg);
+      if (!vals || !vals.length) vals = xLabels.map(function(){ return null; });
+
+      var textArr = [];
+      if (isActive) {
+        textArr = vals.map(function(v, i){
+          if (v === null) return '';
+          var pctLabel = (v*100).toFixed(1) + '%';
+          // If this is the EW trace and we have ratio data, prepend ×ratio above the %
+          if (kpi.id === 'ew' && mult) {
+            var r = mult[i];
+            if (r !== null && r !== undefined && !isNaN(r)) {
+              return '<span style="color:#fbbf24;font-size:10px"><b>×' + r.toFixed(1) + '</b></span><br><br> ' + pctLabel;
+            }
+          }
+          return pctLabel;
+        });
+      }
+
+      traces.push({
+        name: kpi.label + '  |  avg: ' + kpi.getAvg(data, seg),
+        type:'bar', x:xLabels,
+        y: isActive ? vals : xLabels.map(function(){ return null; }),
+        text: textArr,
+        textposition:'outside',
+        textfont:{family:'DM Mono, monospace', size:11, color:kpi.color},
+        cliponaxis:false,
+        marker:{color:kpi.color, opacity:0.85, line:{width:0}},
+        hovertemplate:'<b>%{x}</b><br>'+kpi.label+': %{y:.1%}<extra></extra>',
+        visible:isActive, legendgroup:kpi.id, showlegend:isActive
+      });
+    });
+
+    getState(chartId).xTimesAnnots = [];
+    return traces;
+  }
+
+  function getYmax(data, chartId) {
+    var state  = getState(chartId);
+    var seg    = state.seg;
+    var active = state.activeKpis;
+    var ymax   = 0.1;
+    KPI_DEFS.forEach(function(kpi) {
+      if (active.indexOf(kpi.id) !== -1) {
+        var v = kpi.getYmax(data, seg);
+        if (v > ymax) ymax = v;
+      }
+    });
+    return ymax;
+  }
+
+  function buildLayout(data, xLabels, chartId, title) {
+    var state = getState(chartId);
+    
+    var activeSegIndex = Math.max(0, segs.indexOf(state.seg)); // 0=NON VIP, 1=VIP
+return {
+      barmode:'group', bargap:0.22, bargroupgap:0.06,
+      paper_bgcolor:'#171c27', plot_bgcolor:'rgba(0,0,0,0)',
+      font:{family:'DM Sans, sans-serif', color:'#8b93ad'},
+      margin:{t:70, b:50, l:60, r:30},
+      hovermode:'x unified',
+      hoverlabel:{bgcolor:'#1e2436', bordercolor:'#252b3b', font:{family:'DM Sans, sans-serif', size:12, color:'#e8ecf4'}},
+      legend:{
+        orientation:'v', x:0.99, y:1.13, xanchor:'right', yanchor:'top',
+        font:{size:12, color:'#c8d0e8', family:'DM Sans, sans-serif'},
+        bgcolor:'rgba(23,28,39,0.85)', bordercolor:'#252b3b', borderwidth:1, tracegroupgap:10
+      },
+xaxis:{tickfont:{size:11, color:'#6b7591'}, showgrid:false, zeroline:false, linecolor:'#252b3b', tickcolor:'#252b3b'},
+      yaxis:{
+        range:[0, 0.60], tickformat:'.0%',
+        dtick: 0.05,
+        tickfont:{size:11, color:'#6b7591', family:'DM Mono, monospace'},
+        gridcolor:'#1e2436', gridwidth:1, zeroline:false, showline:false, tickcolor:'rgba(0,0,0,0)'
+      },
+      updatemenus:[{
+        active: activeSegIndex,
+      buttons: segs.map(function(s){ return {label:s, method:'skip', args:[[]]}; }),
+        direction:'down', showactive:true,
+        x:0.0, y:1.12, xanchor:'left',
+        bgcolor:'#1e2436', bordercolor:'#252b3b', font:{color:'#e8ecf4', size:12}
+      }]
+    };
+  }
+
+  function redraw(chartId, data, xLabels, title) {
+    var traces = buildTraces(data, xLabels, chartId);
+    var layout = buildLayout(data, xLabels, chartId, title);
+    var st = getState(chartId);
+    layout.annotations = (layout.annotations || []).concat(st.xTimesAnnots || []);
+    Plotly.react(chartId, traces, layout, {responsive:true, displayModeBar:false});
+  }
+
+  function buildPicker(pickerId, chartId, data, xLabels, title) {
+    var container = document.getElementById(pickerId);
+    if (!container) return;
+
+    
+
+    // Ensure the picker renders for every country section (and can be safely re-rendered)
+    container.innerHTML = '';
+var label = document.createElement('span');
+    label.className = 'kpi-picker-label';
+    label.textContent = 'KPIs:';
+    container.appendChild(label);
+
+    var hintEl = document.createElement('span');
+    hintEl.className = 'kpi-max-hint';
+    hintEl.textContent = 'Max 3 selected';
+
+    KPI_DEFS.forEach(function(kpi) {
+      var pill = document.createElement('div');
+      pill.className = 'kpi-pill ' + kpi.colorClass;
+      pill.id = pickerId + '-' + kpi.id;
+      pill.innerHTML = '<span class="pill-dot"></span>' + kpi.label;
+
+      if (getState(chartId).activeKpis.indexOf(kpi.id) !== -1) pill.classList.add('active');
+
+      pill.addEventListener('click', function() {
+        var state  = getState(chartId);
+        var active = state.activeKpis;
+        var order  = state.selectionOrder;
+        var idx    = active.indexOf(kpi.id);
+
+        if (idx !== -1) {
+          if (active.length <= 1) return;
+          active.splice(idx, 1);
+          order.splice(order.indexOf(kpi.id), 1);
+          pill.classList.remove('active');
+        } else {
+          if (active.length >= MAX_KPIS) {
+            var oldest = order.shift();
+            active.splice(active.indexOf(oldest), 1);
+            var oldPill = document.getElementById(pickerId + '-' + oldest);
+            if (oldPill) oldPill.classList.remove('active');
+            hintEl.classList.add('show');
+            setTimeout(function(){ hintEl.classList.remove('show'); }, 1800);
+          }
+          active.push(kpi.id);
+          order.push(kpi.id);
+          pill.classList.add('active');
+        }
+        redraw(chartId, data, xLabels, title);
+      });
+      container.appendChild(pill);
+    });
+
+    container.appendChild(hintEl);
+
+    document.getElementById(chartId).on('plotly_buttonclicked', function(e) {
+      if (e.menu._index === 0) {
+        getState(chartId).seg = segs[e.button._index];
+        redraw(chartId, data, xLabels, title);
+      }
+    });
+  }
+
+  // Init country charts
+  countries.forEach(function(country) {
+    var chartId  = 'chart-' + country.name;
+    var pickerId = 'picker-' + country.name;
+    var title    = 'Early Win & Cash Out Adoption Rate — ' + country.name;
+    var traces = buildTraces(country,weeks,chartId);
+    var layout = buildLayout(country,weeks,chartId,title);
+    var st = getState(chartId);
+    layout.annotations = (layout.annotations || []).concat(st.xTimesAnnots || []);
+    Plotly.newPlot(chartId, traces, layout, {responsive:true, displayModeBar:false});
+    buildPicker(pickerId, chartId, country, weeks, title);
+  });
+
+  // Init summary chart
+  (function() {
+    var chartId  = 'chart-summary';
+    var pickerId = 'picker-summary';
+    var title    = 'Early Win & Cash Out Adoption Rate — All Countries Summary';
+    var traces = buildTraces(summary,countryLabels,chartId);
+    var layout = buildLayout(summary,countryLabels,chartId,title);
+    var st = getState(chartId);
+    layout.annotations = (layout.annotations || []).concat(st.xTimesAnnots || []);
+    Plotly.newPlot(chartId, traces, layout, {responsive:true, displayModeBar:false});
+    buildPicker(pickerId, chartId, summary, countryLabels, title);
+  })();
+
+})();
+
+
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+// FEATURE RATE (BET LEVEL) TAB
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+(function() {
+  var betWeeks = ["Dec 8\u201314", "Dec 15\u201321", "Dec 22\u201328", "Dec 29\u2013Jan 4", "Jan 5\u201311", "Jan 12\u201318", "Jan 19\u201325", "Jan 26\u2013Feb 1"];
+  var betCountryLabels = ["Greece", "Brazil"];
+  var betCountries = [{"name":"Greece","NON VIP":{"ALL":{"ew":[0.0225,0.02328,0.01823,0.01891,0.02376,0.02388,0.02442,0.02125],"co":[0.0767,0.07145,0.07577,0.06593,0.08114,0.06514,0.06695,0.05979],"ewN":[18673,15585,11101,13545,16272,17394,20249,14911],"coN":[63650,47836,46126,47221,55573,47455,55521,41943],"totalN":[829898,669533,608787,716255,684903,728461,829251,701553],"avgEw":"2.2%","avgCo":"7.0%","ymax":0.08114},"BetBuilderCombo":{"ew":[0.01652,0.02077,0.01441,0.0138,0.01914,0.01847,0.01889,0.01684],"co":[0.07955,0.0753,0.07979,0.06439,0.08664,0.06504,0.06501,0.06313],"ewN":[2230,2202,1451,1676,2259,2280,2577,1747],"coN":[10739,7985,8036,7820,10227,8030,8869,6549],"totalN":[134999,106038,100712,121450,118041,123464,136430,103744],"avgEw":"1.7%","avgCo":"7.2%","ymax":0.08664},"Multiple":{"ew":[0.02442,0.02445,0.01941,0.0203,0.02533,0.02563,0.02607,0.0224],"co":[0.07536,0.06968,0.07334,0.06462,0.07821,0.06399,0.06646,0.05825],"ewN":[15689,12761,9235,11284,13347,14402,16750,12408],"coN":[48426,36370,34888,35924,41213,35960,42697,32262],"totalN":[642567,521950,475689,555903,526986,561986,642405,553827],"avgEw":"2.4%","avgCo":"6.9%","ymax":0.07821},"System":{"ew":[0.01441,0.01497,0.01281,0.01504,0.0167,0.01655,0.01829,0.01719],"co":[0.0857,0.08379,0.09887,0.08938,0.10365,0.08056,0.07845,0.07121],"ewN":[754,622,415,585,666,712,922,756],"coN":[4485,3481,3202,3477,4133,3465,3955,3132],"totalN":[52332,41545,32386,38902,39876,43011,50416,43982],"avgEw":"1.6%","avgCo":"8.6%","ymax":0.10365}},"VIP":{"ALL":{"ew":[0.01472,0.01634,0.01421,0.01547,0.01739,0.01898,0.02062,0.01835],"co":[0.07487,0.07431,0.07719,0.07083,0.08231,0.06982,0.073,0.06639],"ewN":[2511,2405,1730,2028,2403,2865,3225,2441],"coN":[12771,10940,9397,9285,11373,10537,11416,8830],"totalN":[170572,147226,121743,131080,138178,150924,156381,132998],"avgEw":"1.7%","avgCo":"7.4%","ymax":0.08231},"BetBuilderCombo":{"ew":[0.01335,0.01541,0.01163,0.01274,0.01668,0.01729,0.02078,0.01669],"co":[0.08022,0.0774,0.08346,0.0695,0.08118,0.06715,0.07308,0.06845],"ewN":[297,298,184,233,318,345,406,238],"coN":[1785,1497,1321,1271,1548,1340,1428,976],"totalN":[22250,19340,15827,18289,19068,19955,19540,14259],"avgEw":"1.6%","avgCo":"7.5%","ymax":0.08346},"Multiple":{"ew":[0.01547,0.01728,0.01523,0.01647,0.01806,0.01977,0.02135,0.01907],"co":[0.07228,0.07161,0.0733,0.06935,0.0797,0.06849,0.07142,0.06455],"ewN":[2071,2018,1488,1695,1976,2373,2669,2056],"coN":[9678,8362,7160,7136,8721,8219,8930,6959],"totalN":[133905,116775,97682,102892,109427,120008,125033,107803],"avgEw":"1.8%","avgCo":"7.1%","ymax":0.0797},"System":{"ew":[0.00992,0.00801,0.00704,0.0101,0.01126,0.01341,0.0127,0.01344],"co":[0.09073,0.09729,0.11125,0.0887,0.11401,0.08923,0.0896,0.08184],"ewN":[143,89,58,100,109,147,150,147],"coN":[1308,1081,916,878,1104,978,1058,895],"totalN":[14417,11111,8234,9899,9683,10961,11808,10936],"avgEw":"1.1%","avgCo":"9.4%","ymax":0.11401}}},{"name":"Brazil","NON VIP":{"ALL":{"ew":[0.01611,0.01497,0.01515,0.01508,0.01694,0.01794,0.01792,0.01848],"co":[0.10732,0.09277,0.10594,0.09363,0.09705,0.08099,0.08546,0.07946],"ewN":[9096,7206,5865,7072,9207,10397,11460,10166],"coN":[60575,44645,41021,43915,52747,46949,54656,43714],"totalN":[564459,481245,387197,469051,543503,579673,639526,550159],"avgEw":"1.7%","avgCo":"9.2%","ymax":0.10732},"BetBuilderCombo":{"ew":[0.01234,0.01252,0.01086,0.01164,0.01391,0.01399,0.01264,0.01391],"co":[0.11741,0.1094,0.11831,0.10542,0.11325,0.09002,0.09108,0.08804],"ewN":[1322,1173,855,1159,1474,1573,1490,1354],"coN":[12581,10247,9312,10501,11999,10119,10738,8567],"totalN":[107152,93668,78706,99611,105949,112403,117897,97309],"avgEw":"1.3%","avgCo":"10.3%","ymax":0.11831},"Multiple":{"ew":[0.01698,0.01555,0.01621,0.01598,0.01763,0.01887,0.01903,0.01938],"co":[0.10475,0.08863,0.10254,0.09022,0.09299,0.07858,0.08398,0.07743],"ewN":[7753,6018,4994,5894,7705,8803,9911,8760],"coN":[47836,34297,31586,33277,40634,36663,43732,34994],"totalN":[456658,386983,308043,368846,436984,466564,520720,451941],"avgEw":"1.8%","avgCo":"8.9%","ymax":0.10475},"System":{"ew":[0.03236,0.02525,0.03571,0.03199,0.04912,0.02975,0.06491,0.05721],"co":[0.24345,0.17003,0.27455,0.23064,0.2,0.23654,0.20462,0.16832],"ewN":[21,15,16,19,28,21,59,52],"coN":[158,101,123,137,114,167,186,153],"totalN":[649,594,448,594,570,706,909,909],"avgEw":"4.3%","avgCo":"21.2%","ymax":0.27455}},"VIP":{"ALL":{"ew":[0.0126,0.01435,0.01468,0.01552,0.01799,0.01907,0.01872,0.02082],"co":[0.10879,0.1036,0.10867,0.10158,0.10451,0.09407,0.09395,0.09392],"ewN":[2015,2016,1723,2096,2874,3139,3218,2860],"coN":[17397,14550,12751,13722,16694,15483,16149,12899],"totalN":[159912,140444,117336,135081,159740,164586,171884,137337],"avgEw":"1.7%","avgCo":"10.1%","ymax":0.10879},"BetBuilderCombo":{"ew":[0.01255,0.01294,0.01314,0.01249,0.01614,0.017,0.01678,0.01876],"co":[0.12613,0.1213,0.12529,0.11237,0.11685,0.09394,0.09623,0.09947],"ewN":[353,313,273,327,442,501,480,406],"coN":[3547,2933,2603,2941,3199,2768,2752,2153],"totalN":[28122,24180,20775,26173,27378,29465,28599,21644],"avgEw":"1.5%","avgCo":"11.1%","ymax":0.12613},"Multiple":{"ew":[0.01262,0.01468,0.01504,0.01628,0.01842,0.01956,0.01915,0.02128],"co":[0.10513,0.09999,0.10517,0.09901,0.10198,0.09411,0.0936,0.09295],"ewN":[1659,1702,1450,1769,2432,2633,2733,2452],"coN":[13817,11593,10137,10758,13465,12670,13358,10710],"totalN":[131424,115942,96388,108660,132034,134625,142713,115225],"avgEw":"1.7%","avgCo":"9.9%","ymax":0.10517},"System":{"ew":[0.0082,0.00311,0,0,0,0.01008,0.00874,0.00427],"co":[0.09016,0.07453,0.06358,0.09274,0.09146,0.09073,0.06818,0.07692],"ewN":[3,1,0,0,0,5,5,2],"coN":[33,24,11,23,30,45,39,36],"totalN":[366,322,173,248,328,496,572,468],"avgEw":"0.5%","avgCo":"8.1%","ymax":0.09274}}}];
+  var betSummary = {"name":"All Countries","NON VIP":{"ALL":{"ew":[0.02214,0.01672],"co":[0.07026,0.09211],"ewN":[127730,70469],"coN":[405325,388222],"totalN":[5768641,4214813],"avgEw":"2.2%","avgCo":"8.3%","ymax":0.09211},"BetBuilderCombo":{"ew":[0.01738,0.0128],"co":[0.07224,0.10344],"ewN":[16422,10400],"coN":[68255,84064],"totalN":[944878,812695],"avgEw":"1.5%","avgCo":"8.7%","ymax":0.10344},"Multiple":{"ew":[0.02363,0.01762],"co":[0.06867,0.08921],"ewN":[105876,59838],"coN":[307740,303019],"totalN":[4481313,3396739],"avgEw":"2.1%","avgCo":"7.8%","ymax":0.08921},"System":{"ew":[0.01586,0.04294],"co":[0.08565,0.21175],"ewN":[5432,231],"coN":[29330,1139],"totalN":[342450,5379],"avgEw":"1.6%","avgCo":"8.8%","ymax":0.21175}},"VIP":{"ALL":{"ew":[0.01706,0.01681],"co":[0.07358,0.10085],"ewN":[19608,19941],"coN":[84549,119645],"totalN":[1149102,1186320],"avgEw":"2.0%","avgCo":"9.0%","ymax":0.10085},"BetBuilderCombo":{"ew":[0.01561,0.015],"co":[0.07518,0.11096],"ewN":[2319,3095],"coN":[11166,22896],"totalN":[148528,206336],"avgEw":"1.5%","avgCo":"9.6%","ymax":0.11096},"Multiple":{"ew":[0.01789,0.01723],"co":[0.07133,0.09878],"ewN":[16346,16830],"coN":[65165,96508],"totalN":[913525,977011],"avgEw":"1.8%","avgCo":"8.6%","ymax":0.09878},"System":{"ew":[0.01083,0.00538],"co":[0.09441,0.08106],"ewN":[943,16],"coN":[8218,241],"totalN":[87049,2973],"avgEw":"1.1%","avgCo":"9.4%","ymax":0.09441}}};
+
+  var segs = ["NON VIP","VIP"];
+  var BET_KPI_DEFS = [
+    {id:'ew', label:'Early Win Bet Rate', colorClass:'color-ew', color:'#4f8ef7',
+      getData: function(d,seg,bt){ return d[seg][bt].ew; },
+      getAvg:  function(d,seg,bt){ return d[seg][bt].avgEw; },
+      getYmax: function(d,seg,bt){ return d[seg][bt].ymax; }
+    },
+    {id:'co', label:'Cash Out Bet Rate', colorClass:'color-co', color:'#34d399',
+      getData: function(d,seg,bt){ return d[seg][bt].co; },
+      getAvg:  function(d,seg,bt){ return d[seg][bt].avgCo; },
+      getYmax: function(d,seg,bt){ return d[seg][bt].ymax; }
+    }
+  ];
+
+  var MAX_KPIS = 2;
+  var betChartStates = {};
+
+  function getState(chartId) {
+    if (!betChartStates[chartId]) {
+      betChartStates[chartId] = { seg:'NON VIP', activeKpis:['ew','co'], selectionOrder:['ew','co'], betType:'ALL' };
+    }
+    return betChartStates[chartId];
+  }
+
+  function buildTraces(data, xLabels, chartId) {
+    var state = getState(chartId);
+    var seg   = state.seg;
+    var bt    = state.betType;
+    var active = state.activeKpis;
+
+    var showEw = active.indexOf('ew') !== -1;
+    var showCo = active.indexOf('co') !== -1;
+    var mult = null;
+    if (showEw && showCo) {
+      var ewVals = data[seg][bt].ew;
+      var coVals = data[seg][bt].co;
+      mult = xLabels.map(function(_, i){
+        var ew = ewVals[i]; var co = coVals[i];
+        if (!ew || ew === 0 || co === null || co === undefined) return null;
+        return co / ew;
+      });
+    }
+
+    var ewNums   = data[seg][bt].ewN || [];
+    var coNums   = data[seg][bt].coN || [];
+    var totalNums = data[seg][bt].totalN || [];
+
+    var traces = [];
+    BET_KPI_DEFS.forEach(function(kpi) {
+      var isActive = active.indexOf(kpi.id) !== -1;
+      var vals = kpi.getData(data, seg, bt);
+      if (!vals || !vals.length) vals = xLabels.map(function(){ return null; });
+
+      var textArr = [];
+      if (isActive) {
+        textArr = vals.map(function(v, i){
+          if (v === null) return '';
+          var pctLabel = (v*100).toFixed(1) + '%';
+          if (kpi.id === 'ew' && mult) {
+            var r = mult[i];
+            if (r !== null && r !== undefined && !isNaN(r)) {
+              return '<span style="color:#fbbf24;font-size:10px"><b>\u00d7' + r.toFixed(1) + '</b></span><br><br> ' + pctLabel;
+            }
+          }
+          return pctLabel;
+        });
+      }
+
+      var customHover = [];
+      if (isActive) {
+        customHover = vals.map(function(v, i) {
+          if (v === null) return '';
+          var n = (kpi.id === 'ew') ? ewNums[i] : coNums[i];
+          var t = totalNums[i];
+          var nFmt = (n !== undefined && n !== null) ? n.toLocaleString() : '\u2014';
+          var tFmt = (t !== undefined && t !== null) ? t.toLocaleString() : '\u2014';
+          var betLabel = (kpi.id === 'ew') ? 'Early Win Bets' : 'Cash Out Bets';
+          return kpi.label + ': ' + (v*100).toFixed(1) + '%' +
+            '<br>' + betLabel + ': ' + nFmt +
+            '<br>Total Bets: ' + tFmt;
+        });
+      }
+
+      traces.push({
+        name: kpi.label + '  |  avg: ' + kpi.getAvg(data, seg, bt),
+        type:'bar', x:xLabels,
+        y: isActive ? vals : xLabels.map(function(){ return null; }),
+        text: textArr,
+        textposition:'outside',
+        textfont:{family:'DM Mono, monospace', size:11, color:kpi.color},
+        cliponaxis:false,
+        marker:{color:kpi.color, opacity:0.85, line:{width:0}},
+        customdata: customHover,
+        hovertemplate:'%{customdata}<extra></extra>',
+        visible:isActive, legendgroup:kpi.id, showlegend:isActive
+      });
+    });
+    return traces;
+  }
+
+  // Precompute single global ymax across ALL countries, ALL segments, ALL bet types
+  var allBetSources = betCountries.concat([betSummary]);
+  var globalYmax = 0.1;
+  ['NON VIP','VIP'].forEach(function(seg) {
+    ['ALL','BetBuilderCombo','Multiple','System'].forEach(function(bt) {
+      allBetSources.forEach(function(src) {
+        if (src[seg] && src[seg][bt] && src[seg][bt].ymax) {
+          var v = src[seg][bt].ymax;
+          if (v > globalYmax) globalYmax = v;
+        }
+      });
+    });
+  });
+
+  function buildLayout(data, xLabels, chartId, title) {
+    var state = getState(chartId);
+    var activeSegIndex = Math.max(0, segs.indexOf(state.seg));
+    // Use single global ymax so all charts share the same y-scale
+    var ymax = globalYmax;
+    var betTypes = ['ALL','BetBuilderCombo','Multiple','System'];
+    var betTypeLabels = ['All Bet Types','BB Combo','Multiple','System'];
+    var activeBtIndex = Math.max(0, betTypes.indexOf(state.betType));
+
+    return {
+      barmode:'group', bargap:0.22, bargroupgap:0.06,
+      paper_bgcolor:'#171c27', plot_bgcolor:'rgba(0,0,0,0)',
+      font:{family:'DM Sans, sans-serif', color:'#8b93ad'},
+      margin:{t:90, b:50, l:60, r:30},
+      hovermode:'x unified',
+      hoverlabel:{bgcolor:'#1e2436', bordercolor:'#252b3b', font:{family:'DM Sans, sans-serif', size:12, color:'#e8ecf4'}},
+      legend:{
+        orientation:'v', x:0.99, y:1.13, xanchor:'right', yanchor:'top',
+        font:{size:12, color:'#c8d0e8', family:'DM Sans, sans-serif'},
+        bgcolor:'rgba(23,28,39,0.85)', bordercolor:'#252b3b', borderwidth:1, tracegroupgap:10
+      },
+      xaxis:{tickfont:{size:11, color:'#6b7591'}, showgrid:false, zeroline:false, linecolor:'#252b3b', tickcolor:'#252b3b'},
+      yaxis:{
+        range:[0, Math.min(ymax * 1.3, 1.0)], tickformat:'.0%',
+        dtick: 0.05,
+        tickfont:{size:11, color:'#6b7591', family:'DM Mono, monospace'},
+        gridcolor:'#1e2436', gridwidth:1, zeroline:false, showline:false, tickcolor:'rgba(0,0,0,0)'
+      },
+      annotations:[
+        {text:'VIP Level', x:0.0, y:1.26, xref:'paper', yref:'paper', showarrow:false,
+         font:{size:10, color:'#6b7591', family:'DM Sans, sans-serif'}, xanchor:'left'},
+        {text:'Bet Type', x:0.12, y:1.26, xref:'paper', yref:'paper', showarrow:false,
+         font:{size:10, color:'#6b7591', family:'DM Sans, sans-serif'}, xanchor:'left'}
+      ],
+      updatemenus:[
+        {
+          active: activeSegIndex,
+          buttons: segs.map(function(s){ return {label:s, method:'skip', args:[[]]}; }),
+          direction:'down', showactive:true,
+          x:0.0, y:1.18, xanchor:'left',
+          bgcolor:'#1e2436', bordercolor:'#252b3b', font:{color:'#e8ecf4', size:12}
+        },
+        {
+          active: activeBtIndex,
+          buttons: betTypes.map(function(bt, idx){ return {label:betTypeLabels[idx], method:'skip', args:[[]]}; }),
+          direction:'down', showactive:true,
+          x:0.12, y:1.18, xanchor:'left',
+          bgcolor:'#1e2436', bordercolor:'#252b3b', font:{color:'#e8ecf4', size:12}
+        }
+      ]
+    };
+  }
+
+  function redraw(chartId, data, xLabels, title) {
+    var traces = buildTraces(data, xLabels, chartId);
+    var layout = buildLayout(data, xLabels, chartId, title);
+    Plotly.react(chartId, traces, layout, {responsive:true, displayModeBar:false});
+  }
+
+  function buildPicker(pickerId, chartId, data, xLabels, title) {
+    var container = document.getElementById(pickerId);
+    if (!container) return;
+    container.innerHTML = '';
+    var label = document.createElement('span');
+    label.className = 'kpi-picker-label';
+    label.textContent = 'KPIs:';
+    container.appendChild(label);
+
+    var hintEl = document.createElement('span');
+    hintEl.className = 'kpi-max-hint';
+    hintEl.textContent = 'Max 2 selected';
+
+    BET_KPI_DEFS.forEach(function(kpi) {
+      var pill = document.createElement('div');
+      pill.className = 'kpi-pill ' + kpi.colorClass;
+      pill.id = pickerId + '-' + kpi.id;
+      pill.innerHTML = '<span class="pill-dot"></span>' + kpi.label;
+      if (getState(chartId).activeKpis.indexOf(kpi.id) !== -1) pill.classList.add('active');
+
+      pill.addEventListener('click', function() {
+        var state  = getState(chartId);
+        var active = state.activeKpis;
+        var order  = state.selectionOrder;
+        var idx    = active.indexOf(kpi.id);
+        if (idx !== -1) {
+          if (active.length <= 1) return;
+          active.splice(idx, 1);
+          order.splice(order.indexOf(kpi.id), 1);
+          pill.classList.remove('active');
+        } else {
+          if (active.length >= MAX_KPIS) {
+            var oldest = order.shift();
+            active.splice(active.indexOf(oldest), 1);
+            var oldPill = document.getElementById(pickerId + '-' + oldest);
+            if (oldPill) oldPill.classList.remove('active');
+            hintEl.classList.add('show');
+            setTimeout(function(){ hintEl.classList.remove('show'); }, 1800);
+          }
+          active.push(kpi.id);
+          order.push(kpi.id);
+          pill.classList.add('active');
+        }
+        redraw(chartId, data, xLabels, title);
+      });
+      container.appendChild(pill);
+    });
+
+    container.appendChild(hintEl);
+
+    var betTypes = ['ALL','BetBuilderCombo','Multiple','System'];
+
+    document.getElementById(chartId).on('plotly_buttonclicked', function(e) {
+      if (e.menu._index === 0) {
+        getState(chartId).seg = segs[e.button._index];
+        redraw(chartId, data, xLabels, title);
+      } else if (e.menu._index === 1) {
+        getState(chartId).betType = betTypes[e.button._index];
+        redraw(chartId, data, xLabels, title);
+      }
+    });
+  }
+
+  var betChartRefs = {};
+
+  betCountries.forEach(function(country) {
+    var chartId  = 'bet-chart-' + country.name;
+    var pickerId = 'bet-picker-' + country.name;
+    var title    = 'Early Win & Cash Out Bet Rate \u2014 ' + country.name;
+    betChartRefs[chartId] = {data:country, xLabels:betWeeks, title:title, pickerId:pickerId};
+    var traces = buildTraces(country, betWeeks, chartId);
+    var layout = buildLayout(country, betWeeks, chartId, title);
+    Plotly.newPlot(chartId, traces, layout, {responsive:true, displayModeBar:false});
+    buildPicker(pickerId, chartId, country, betWeeks, title);
+  });
+
+  (function() {
+    var chartId  = 'bet-chart-summary';
+    var pickerId = 'bet-picker-summary';
+    var title    = 'Early Win & Cash Out Bet Rate \u2014 All Countries Summary';
+    betChartRefs[chartId] = {data:betSummary, xLabels:betCountryLabels, title:title, pickerId:pickerId};
+    var traces = buildTraces(betSummary, betCountryLabels, chartId);
+    var layout = buildLayout(betSummary, betCountryLabels, chartId, title);
+    Plotly.newPlot(chartId, traces, layout, {responsive:true, displayModeBar:false});
+    buildPicker(pickerId, chartId, betSummary, betCountryLabels, title);
+  })();
+})();
+
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+// STAKES & LEGS (BET LEVEL) TAB
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+(function() {
+  var slWeeks = ["Dec 8\u201314", "Dec 15\u201321", "Dec 22\u201328", "Dec 29\u2013Jan 4", "Jan 5\u201311", "Jan 12\u201318", "Jan 19\u201325", "Jan 26\u2013Feb 1"];
+  var slCountryLabels = ["Greece", "Brazil"];
+
+  var legCountries = [{"name":"Greece","NON VIP":{"ALL":{"allLegs":[6.1306,5.983,5.6448,5.9501,5.8356,6.1198,6.1178,6.3625],"ewLegs":[8.0461,8.354,7.7951,8.2688,8.3733,8.8673,8.531,8.7957],"coLegs":[5.7103,5.4392,5.217,5.3583,5.5921,5.4545,5.6097,5.607],"mean_allLegs":6.018,"mean_ewLegs":8.3789,"mean_coLegs":5.4985,"ymax":8.87,"ewN":[18673,15585,11101,13545,16272,17394,20249,14911],"coN":[63650,47836,46126,47221,55573,47455,55521,41943],"totalN":[829898,669533,608787,716255,684903,728461,829251,701553]},"BetBuilderCombo":{"allLegs":[9.506,9.3343,8.711,9.0267,9.2207,9.435,9.654,9.9824],"ewLegs":[10.9762,11.1058,10.2922,10.4523,10.8672,11.564,11.4494,11.6531],"coLegs":[8.6474,8.3416,7.9017,8.0361,8.454,8.3797,8.5747,8.7142],"mean_allLegs":9.3691,"mean_ewLegs":11.0926,"mean_coLegs":8.3903,"ymax":11.65,"ewN":[2230,2202,1451,1676,2259,2280,2577,1747],"coN":[10739,7985,8036,7820,10227,8030,8869,6549],"totalN":[134999,106038,100712,121450,118041,123464,136430,103744]},"Multiple":{"allLegs":[5.4716,5.3368,5.0085,5.308,5.1074,5.4399,5.4138,5.7481],"ewLegs":[7.7231,7.9753,7.4641,8.0345,8.0371,8.5483,8.1918,8.5301],"coLegs":[5.1195,4.835,4.6085,4.8115,4.9409,4.8497,5.0414,5.031],"mean_allLegs":5.3655,"mean_ewLegs":8.0847,"mean_coLegs":4.9164,"ymax":8.55,"ewN":[15689,12761,9235,11284,13347,14402,16750,12408],"coN":[48426,36370,34888,35924,41213,35960,42697,32262],"totalN":[642567,521950,475689,555903,526986,561986,642405,553827]},"System":{"allLegs":[5.5143,5.5479,5.4564,5.521,5.4387,5.4872,5.519,5.5604],"ewLegs":[6.1021,6.3826,6.4289,6.5333,6.6517,6.6854,6.5369,6.5516],"coLegs":[5.056,5.0942,5.1087,4.9853,5.0036,4.9521,5.0963,5.0437],"mean_allLegs":5.5081,"mean_ewLegs":6.4858,"mean_coLegs":5.0424,"ymax":6.69,"ewN":[754,622,415,585,666,712,922,756],"coN":[4485,3481,3202,3477,4133,3465,3955,3132],"totalN":[52332,41545,32386,38902,39876,43011,50416,43982]}},"VIP":{"ALL":{"allLegs":[5.5164,5.3421,4.9275,5.3411,5.3359,5.4846,5.573,5.5914],"ewLegs":[7.9662,8.8108,7.819,7.9453,8.464,8.6311,8.8338,8.3589],"coLegs":[5.2771,5.0078,4.8429,5.0524,5.0442,5.1362,5.3067,5.2345],"mean_allLegs":5.389,"mean_ewLegs":8.3536,"mean_coLegs":5.1127,"ymax":8.83,"ewN":[2511,2405,1730,2028,2403,2865,3225,2441],"coN":[12771,10940,9397,9285,11373,10537,11416,8830],"totalN":[170572,147226,121743,131080,138178,150924,156381,132998]},"BetBuilderCombo":{"allLegs":[9.3066,9.2028,8.5644,9.0525,9.0027,9.3227,9.732,9.9152],"ewLegs":[11.0976,10.7919,10.3315,10.6395,11.4057,11.3246,12.0197,12.2563],"coLegs":[8.3686,8.5651,7.5026,8.3493,8.2403,8.509,8.6877,8.9191],"mean_allLegs":9.2602,"mean_ewLegs":11.3079,"mean_coLegs":8.3783,"ymax":12.26,"ewN":[297,298,184,233,318,345,406,238],"coN":[1785,1497,1321,1271,1548,1340,1428,976],"totalN":[22250,19340,15827,18289,19068,19955,19540,14259]},"Multiple":{"allLegs":[4.8562,4.664,4.2877,4.6464,4.6586,4.8226,4.8973,4.9929],"ewLegs":[7.5983,8.6338,7.5685,7.6956,8.0916,8.3991,8.4773,8.0516],"coLegs":[4.707,4.3549,4.33,4.4912,4.4645,4.5714,4.7906,4.7261],"mean_allLegs":4.7409,"mean_ewLegs":8.1099,"mean_coLegs":4.5607,"ymax":8.63,"ewN":[2071,2018,1488,1695,1976,2373,2669,2056],"coN":[9678,8362,7160,7136,8721,8219,8930,6959],"totalN":[133905,116775,97682,102892,109427,120008,125033,107803]},"System":{"allLegs":[5.7983,5.7485,5.5262,5.7051,5.7692,5.7457,5.8457,5.8537],"ewLegs":[6.7902,6.191,6.2759,5.9,6.633,6.0544,6.5533,6.3469],"coLegs":[5.2768,5.1323,5.0164,4.8405,5.1422,5.2618,5.0992,5.1698],"mean_allLegs":5.7591,"mean_ewLegs":6.368,"mean_coLegs":5.1278,"ymax":6.79,"ewN":[143,89,58,100,109,147,150,147],"coN":[1308,1081,916,878,1104,978,1058,895],"totalN":[14417,11111,8234,9899,9683,10961,11808,10936]}}},{"name":"Brazil","NON VIP":{"ALL":{"allLegs":[7.2957,7.0638,6.6181,7.1748,7.0693,7.5326,7.4187,7.7334],"ewLegs":[9.1089,9.5488,8.7241,9.9961,9.8908,10.2635,10.078,10.2796],"coLegs":[6.8607,6.3408,6.0827,6.6981,6.5755,6.4297,6.6874,6.558],"mean_allLegs":7.2383,"mean_ewLegs":9.7362,"mean_coLegs":6.5291,"ymax":10.28,"ewN":[9096,7206,5865,7072,9207,10397,11460,10166],"coN":[60575,44645,41021,43915,52747,46949,54656,43714],"totalN":[564459,481245,387197,469051,543503,579673,639526,550159]},"BetBuilderCombo":{"allLegs":[10.6568,9.9114,9.1551,10.0586,10.0269,10.531,10.8191,12.1534],"ewLegs":[12.1679,12.7306,11.5135,13.0794,13.1533,13.4132,13.0577,13.7275],"coLegs":[9.5772,8.9557,8.4182,9.3329,9.1589,8.9906,9.333,9.658],"mean_allLegs":10.4554,"mean_ewLegs":12.9377,"mean_coLegs":9.1893,"ymax":13.73,"ewN":[1322,1173,855,1159,1474,1573,1490,1354],"coN":[12581,10247,9312,10501,11999,10119,10738,8567],"totalN":[107152,93668,78706,99611,105949,112403,117897,97309]},"Multiple":{"allLegs":[6.5097,6.377,5.9724,6.3995,6.3551,6.8147,6.6533,6.788],"ewLegs":[8.5927,8.9342,8.2519,9.3984,9.2771,9.7057,9.6481,9.7687],"coLegs":[6.153,5.5629,5.3996,5.8763,5.8186,5.7333,6.0462,5.8084],"mean_allLegs":6.5149,"mean_ewLegs":9.2768,"mean_coLegs":5.8265,"ymax":9.77,"ewN":[7753,6018,4994,5894,7705,8803,9911,8760],"coN":[47836,34297,31586,33277,40634,36663,43732,34994],"totalN":[456658,386983,308043,368846,436984,466564,520720,451941]},"System":{"allLegs":[5.3945,5.5051,4.8906,4.9983,4.8211,4.5623,4.8658,4.6194],"ewLegs":[7.0952,7.3333,7.0625,7.3158,7.0357,8.1429,7.0508,6.5769],"coLegs":[4.8101,5.2079,4.6992,4.3577,4.4474,4.1557,4.7151,4.4379],"mean_allLegs":4.9307,"mean_ewLegs":7.0866,"mean_coLegs":4.5812,"ymax":8.14,"ewN":[21,15,16,19,28,21,59,52],"coN":[158,101,123,137,114,167,186,153],"totalN":[649,594,448,594,570,706,909,909]}},"VIP":{"ALL":{"allLegs":[6.1616,5.9233,5.5485,5.9141,5.8925,6.191,6.3161,6.3481],"ewLegs":[8.5295,8.567,8.2293,9.0148,8.9464,9.4424,9.322,9.1528],"coLegs":[5.909,5.4632,5.1665,5.6286,5.4845,5.3886,5.6285,5.6191],"mean_allLegs":6.0369,"mean_ewLegs":8.9005,"mean_coLegs":5.536,"ymax":9.44,"ewN":[2015,2016,1723,2096,2874,3139,3218,2860],"coN":[17397,14550,12751,13722,16694,15483,16149,12899],"totalN":[159912,140444,117336,135081,159740,164586,171884,137337]},"BetBuilderCombo":{"allLegs":[9.8074,9.2285,8.5694,9.1904,9.1962,9.3721,9.8666,10.0869],"ewLegs":[11.5977,11.5974,10.4359,13.4557,12.3167,12.8762,12.8667,12.5517],"coLegs":[8.6961,8.3058,7.5482,8.2108,8.1619,8.1561,8.5429,8.4477],"mean_allLegs":9.4309,"mean_ewLegs":12.3231,"mean_coLegs":8.2716,"ymax":13.46,"ewN":[353,313,273,327,442,501,480,406],"coN":[3547,2933,2603,2941,3199,2768,2752,2153],"totalN":[28122,24180,20775,26173,27378,29465,28599,21644]},"Multiple":{"allLegs":[5.3824,5.233,4.8961,5.1232,5.2072,5.4951,5.6063,5.6466],"ewLegs":[7.8776,8.0094,7.8138,8.1939,8.3339,8.7979,8.7051,8.5885],"coLegs":[5.1969,4.7433,4.5548,4.9196,4.8478,4.7843,5.0284,5.0468],"mean_allLegs":5.3436,"mean_ewLegs":8.3665,"mean_coLegs":4.9012,"ymax":8.8,"ewN":[1659,1702,1450,1769,2432,2633,2733,2452],"coN":[13817,11593,10137,10758,13465,12670,13358,10710],"totalN":[131424,115942,96388,108660,132034,134625,142713,115225]},"System":{"allLegs":[5.847,6.2919,6.3006,6.6613,6.0091,6.0887,5.8951,6.1581],"ewLegs":[8,9,null,null,null,4.8,6.2,11],"coLegs":[4.4848,5.7917,5.2727,7.0435,5.7667,5.2889,5.5385,6.7222],"mean_allLegs":6.1059,"mean_ewLegs":6.875,"mean_coLegs":5.7096,"ymax":11,"ewN":[3,1,0,0,0,5,5,2],"coN":[33,24,11,23,30,45,39,36],"totalN":[366,322,173,248,328,496,572,468]}}}];
+  var legSummary = {"name":"All Countries","NON VIP":{"ALL":{"allLegs":[6.0192,7.2396],"ewLegs":[8.3792,9.7305],"coLegs":[5.5001,6.5278],"mean_allLegs":6.8614,"mean_ewLegs":9.1605,"mean_coLegs":6.2936,"ymax":9.73,"ewN":[127730,70469],"coN":[405325,388222],"totalN":[5768641,4214813]},"BetBuilderCombo":{"allLegs":[9.3691,10.4554],"ewLegs":[11.0926,12.9377],"coLegs":[8.3903,9.1893],"mean_allLegs":9.8714,"mean_ewLegs":11.808,"mean_coLegs":8.8312,"ymax":12.94,"ewN":[16422,10400],"coN":[68255,84064],"totalN":[944878,812695]},"Multiple":{"allLegs":[5.3655,6.5149],"ewLegs":[8.0847,9.2768],"coLegs":[4.9164,5.8265],"mean_allLegs":5.8611,"mean_ewLegs":8.5151,"mean_coLegs":5.3679,"ymax":9.28,"ewN":[105876,59838],"coN":[307740,303019],"totalN":[4481313,3396739]},"System":{"allLegs":[5.5081,4.9307],"ewLegs":[6.4858,7.0866],"coLegs":[5.0424,4.5812],"mean_allLegs":5.4991,"mean_ewLegs":6.5103,"mean_coLegs":5.0251,"ymax":7.09,"ewN":[5432,231],"coN":[29330,1139],"totalN":[342450,5379]}},"VIP":{"ALL":{"allLegs":[5.3916,6.0373],"ewLegs":[8.3565,8.8984],"coLegs":[5.1161,5.5365],"mean_allLegs":6.5368,"mean_ewLegs":8.4446,"mean_coLegs":5.3812,"ymax":8.9,"ewN":[19608,19941],"coN":[84549,119645],"totalN":[1149102,1186320]},"BetBuilderCombo":{"allLegs":[9.2602,9.4309],"ewLegs":[11.3079,12.3231],"coLegs":[8.3783,8.2716],"mean_allLegs":9.3595,"mean_ewLegs":11.8882,"mean_coLegs":8.3066,"ymax":12.32,"ewN":[2319,3095],"coN":[11166,22896],"totalN":[148528,206336]},"Multiple":{"allLegs":[4.7409,5.3436],"ewLegs":[8.1099,8.3665],"coLegs":[4.5607,4.9012],"mean_allLegs":5.0524,"mean_ewLegs":8.2401,"mean_coLegs":4.764,"ymax":8.37,"ewN":[16346,16830],"coN":[65165,96508],"totalN":[913525,977011]},"System":{"allLegs":[5.7591,6.1059],"ewLegs":[6.368,6.875],"coLegs":[5.1278,5.7096],"mean_allLegs":5.7706,"mean_ewLegs":6.3764,"mean_coLegs":5.1443,"ymax":6.88,"ewN":[943,16],"coN":[8218,241],"totalN":[87049,2973]}}};
+  var stakeCountries = [{"name":"Greece","NON VIP":{"ALL":{"allStake":[8.04,8.66,7.95,8.31,8.62,8.43,8.51,7.75],"ewStake":[6.93,7.84,8.21,7.92,7.46,8.1,6.9,6.74],"coStake":[12.88,14.38,13.05,14,13.21,13.88,19.65,13.51],"mean_allStake":8.28,"mean_ewStake":7.51,"mean_coStake":14.32,"ymax":19.65,"ewN":[18673,15585,11101,13545,16272,17394,20249,14911],"coN":[63650,47836,46126,47221,55573,47455,55521,41943],"totalN":[829898,669533,608787,716255,684903,728461,829251,701553]},"BetBuilderCombo":{"allStake":[7.89,7.91,7.31,7.76,7.59,7.56,6.85,6.82],"ewStake":[7.2,8.06,8.02,8.43,6.93,7.79,7.62,5.66],"coStake":[12.59,12.43,11.51,12.11,11.24,11.26,10.86,10.61],"mean_allStake":7.4655,"mean_ewStake":7.4602,"mean_coStake":11.6156,"ymax":12.59,"ewN":[2230,2202,1451,1676,2259,2280,2577,1747],"coN":[10739,7985,8036,7820,10227,8030,8869,6549],"totalN":[134999,106038,100712,121450,118041,123464,136430,103744]},"Multiple":{"allStake":[8.31,9.09,8.3,8.66,9.13,8.91,9.15,8.14],"ewStake":[6.95,7.85,8.32,7.93,7.5,8.2,6.77,6.88],"coStake":[13.53,15.45,14.05,15.1,14.34,15.12,22.74,14.81],"mean_allStake":8.7143,"mean_ewStake":7.4851,"mean_coStake":15.7054,"ymax":22.74,"ewN":[15689,12761,9235,11284,13347,14402,16750,12408],"coN":[48426,36370,34888,35924,41213,35960,42697,32262],"totalN":[642567,521950,475689,555903,526986,561986,642405,553827]},"System":{"allStake":[5.17,5.12,4.89,5.02,4.99,4.59,4.77,5],"ewStake":[5.7,6.83,6.38,6.18,8.39,7.07,7.35,6.91],"coStake":[6.6,7.61,6.06,6.9,6.82,7.13,6,6.17],"mean_allStake":4.9459,"mean_ewStake":6.8909,"mean_coStake":6.6633,"ymax":8.39,"ewN":[754,622,415,585,666,712,922,756],"coN":[4485,3481,3202,3477,4133,3465,3955,3132],"totalN":[52332,41545,32386,38902,39876,43011,50416,43982]}},"VIP":{"ALL":{"allStake":[32.12,34.02,30.82,32.04,33.06,33.05,32.62,28.41],"ewStake":[42.02,42.92,34.72,35.1,41.26,46.32,31.92,29.39],"coStake":[49.14,63.27,49.96,53.59,52.07,55.4,52.5,44.93],"mean_allStake":32.02,"mean_ewStake":37.96,"mean_coStake":52.61,"ymax":63.27,"ewN":[2511,2405,1730,2028,2403,2865,3225,2441],"coN":[12771,10940,9397,9285,11373,10537,11416,8830],"totalN":[170572,147226,121743,131080,138178,150924,156381,132998]},"BetBuilderCombo":{"allStake":[26.47,25.86,25.21,26.15,27.13,30.08,26.12,25.66],"ewStake":[40.08,40.96,32.09,36.11,51.6,47.27,28.58,21.97],"coStake":[39.92,34.91,44.18,35.37,55.21,40.57,30.76,31.33],"mean_allStake":26.6628,"mean_ewStake":37.9376,"mean_coStake":39.5098,"ymax":55.21,"ewN":[297,298,184,233,318,345,406,238],"coN":[1785,1497,1321,1271,1548,1340,1428,976],"totalN":[22250,19340,15827,18289,19068,19955,19540,14259]},"Multiple":{"allStake":[34.9,37.13,33.06,34.73,35.75,35.28,35.43,30.23],"ewStake":[43.7,43.91,33.84,34.62,41.2,47.96,32.95,30.68],"coStake":[54.25,73.67,55.2,61.37,56.13,61.99,60.19,50.17],"mean_allStake":34.6423,"mean_ewStake":38.8101,"mean_coStake":59.2322,"ymax":73.67,"ewN":[2071,2018,1488,1695,1976,2373,2669,2056],"coN":[9678,8362,7160,7136,8721,8219,8930,6959],"totalN":[133905,116775,97682,102892,109427,120008,125033,107803]},"System":{"allStake":[15.02,15.52,15.03,14.92,14.27,14.06,13.57,14.1],"ewStake":[21.8,27.15,65.64,40.82,12.28,17.68,22.53,23.28],"coStake":[23.95,22.11,17.3,16.71,15.64,20.34,16.93,19.05],"mean_allStake":14.5568,"mean_ewStake":25.6225,"mean_coStake":19.2098,"ymax":65.64,"ewN":[143,89,58,100,109,147,150,147],"coN":[1308,1081,916,878,1104,978,1058,895],"totalN":[14417,11111,8234,9899,9683,10961,11808,10936]}}},{"name":"Brazil","NON VIP":{"ALL":{"allStake":[4.83,4.62,4.32,4.46,4.45,4.02,3.85,3.72],"ewStake":[4.36,5.98,4.29,4.2,4.2,3.93,4.45,3.33],"coStake":[8.25,7.83,7.52,7.38,7.7,7.06,6.4,6.44],"mean_allStake":4.28,"mean_ewStake":4.34,"mean_coStake":7.32,"ymax":8.25,"ewN":[9096,7206,5865,7072,9207,10397,11460,10166],"coN":[60575,44645,41021,43915,52747,46949,54656,43714],"totalN":[564459,481245,387197,469051,543503,579673,639526,550159]},"BetBuilderCombo":{"allStake":[5.88,5.23,4.48,4.44,4.08,4.04,3.67,3.57],"ewStake":[5.81,13.38,4.4,6.16,4.93,3.87,4.18,4.44],"coStake":[9.27,9.02,7.81,7.38,6.92,6.22,5.97,5.86],"mean_allStake":4.4067,"mean_ewStake":5.7569,"mean_coStake":7.3701,"ymax":13.38,"ewN":[1322,1173,855,1159,1474,1573,1490,1354],"coN":[12581,10247,9312,10501,11999,10119,10738,8567],"totalN":[107152,93668,78706,99611,105949,112403,117897,97309]},"Multiple":{"allStake":[4.58,4.47,4.28,4.47,4.53,4.01,3.89,3.75],"ewStake":[4.1,4.54,4.27,3.82,4.06,3.93,4.48,3.16],"coStake":[7.99,7.46,7.43,7.39,7.93,7.29,6.51,6.59],"mean_allStake":4.2274,"mean_ewStake":4.026,"mean_coStake":7.3377,"ymax":7.99,"ewN":[7753,6018,4994,5894,7705,8803,9911,8760],"coN":[47836,34297,31586,33277,40634,36663,43732,34994],"totalN":[456658,386983,308043,368846,436984,466564,520720,451941]},"System":{"allStake":[9.86,9.93,6.77,4.76,14.48,4.82,5.74,4.13],"ewStake":[7.27,7.41,6.15,4.38,4.37,7.86,7.12,3.76],"coStake":[5.69,10.55,7.8,4.31,6.22,7.8,6.31,5.58],"mean_allStake":7.2107,"mean_ewStake":5.8375,"mean_coStake":6.6317,"ymax":14.48,"ewN":[21,15,16,19,28,21,59,52],"coN":[158,101,123,137,114,167,186,153],"totalN":[649,594,448,594,570,706,909,909]}},"VIP":{"ALL":{"allStake":[18.5,18.78,18.45,19.11,18.9,18.72,16.95,18.55],"ewStake":[25.38,27.5,23.52,27.01,29.2,22.54,24.52,24.73],"coStake":[29.61,29.37,31.24,30.71,31.22,31.17,26.18,32.01],"mean_allStake":18.5,"mean_ewStake":25.55,"mean_coStake":30.19,"ymax":32.01,"ewN":[2015,2016,1723,2096,2874,3139,3218,2860],"coN":[17397,14550,12751,13722,16694,15483,16149,12899],"totalN":[159912,140444,117336,135081,159740,164586,171884,137337]},"BetBuilderCombo":{"allStake":[21.17,20.3,20,20.34,20.75,21.62,19.17,18.06],"ewStake":[27.15,22.23,39.16,21.55,41.23,25.45,25.32,25.91],"coStake":[32.49,30.65,31.82,29.94,35.56,33.47,30.83,28.25],"mean_allStake":20.2501,"mean_ewStake":28.4093,"mean_coStake":31.7998,"ymax":41.23,"ewN":[353,313,273,327,442,501,480,406],"coN":[3547,2933,2603,2941,3199,2768,2752,2153],"totalN":[28122,24180,20775,26173,27378,29465,28599,21644]},"Multiple":{"allStake":[17.92,18.42,18.12,18.81,18.49,18.03,16.44,18.58],"ewStake":[24.9,28.48,20.57,28.02,27.01,22.01,24.41,24.55],"coStake":[28.91,29.05,31.1,30.93,30.13,30.69,25.09,32.68],"mean_allStake":18.0519,"mean_ewStake":24.9391,"mean_coStake":29.6756,"ymax":32.68,"ewN":[1659,1702,1450,1769,2432,2633,2733,2452],"coN":[13817,11593,10137,10758,13465,12670,13358,10710],"totalN":[131424,115942,96388,108660,132034,134625,142713,115225]},"System":{"allStake":[21.49,33.74,13.97,19.88,30.07,35.13,32.61,34.39],"ewStake":[80.98,15.77,null,null,null,7.75,9.44,12.99],"coStake":[11.99,24.99,26.94,27.08,56.47,25.02,72.02,56.41],"mean_allStake":29.6373,"mean_ewStake":23.165,"mean_coStake":39.7268,"ymax":80.98,"ewN":[3,1,0,0,0,5,5,2],"coN":[33,24,11,23,30,45,39,36],"totalN":[366,322,173,248,328,496,572,468]}}}];
+  var stakeSummary = {"name":"All Countries","NON VIP":{"ALL":{"allStake":[8.28,4.29],"ewStake":[7.51,4.32],"coStake":[14.31,7.32],"mean_allStake":6.85,"mean_ewStake":6.83,"mean_coStake":10.66,"ymax":14.31,"ewN":[127730,70469],"coN":[405325,388222],"totalN":[5768641,4214813]},"BetBuilderCombo":{"allStake":[7.4655,4.4067],"ewStake":[7.4602,5.7569],"coStake":[11.6156,7.3701],"mean_allStake":6.0511,"mean_ewStake":6.7997,"mean_coStake":9.2725,"ymax":11.62,"ewN":[16422,10400],"coN":[68255,84064],"totalN":[944878,812695]},"Multiple":{"allStake":[8.7143,4.2274],"ewStake":[7.4851,4.026],"coStake":[15.7054,7.3377],"mean_allStake":6.7797,"mean_ewStake":6.2361,"mean_coStake":11.5539,"ymax":15.71,"ewN":[105876,59838],"coN":[307740,303019],"totalN":[4481313,3396739]},"System":{"allStake":[4.9459,7.2107],"ewStake":[6.8909,5.8375],"coStake":[6.6633,6.6317],"mean_allStake":4.9809,"mean_ewStake":6.8479,"mean_coStake":6.6621,"ymax":7.21,"ewN":[5432,231],"coN":[29330,1139],"totalN":[342450,5379]}},"VIP":{"ALL":{"allStake":[32.02,18.49],"ewStake":[37.99,25.54],"coStake":[52.57,30.18],"mean_allStake":22.63,"mean_ewStake":26.97,"mean_coStake":36.56,"ymax":52.57,"ewN":[19608,19941],"coN":[84549,119645],"totalN":[1149102,1186320]},"BetBuilderCombo":{"allStake":[26.6628,20.2501],"ewStake":[37.9376,28.4093],"coStake":[39.5098,31.7998],"mean_allStake":22.9341,"mean_ewStake":32.4906,"mean_coStake":34.3272,"ymax":39.51,"ewN":[2319,3095],"coN":[11166,22896],"totalN":[148528,206336]},"Multiple":{"allStake":[34.6423,18.0519],"ewStake":[38.8101,24.9391],"coStake":[59.2322,29.6756],"mean_allStake":26.0686,"mean_ewStake":31.7734,"mean_coStake":41.5888,"ymax":59.23,"ewN":[16346,16830],"coN":[65165,96508],"totalN":[913525,977011]},"System":{"allStake":[14.5568,29.6373],"ewStake":[25.6225,23.165],"coStake":[19.2098,39.7268],"mean_allStake":15.0549,"mean_ewStake":25.5815,"mean_coStake":19.7944,"ymax":39.73,"ewN":[943,16],"coN":[8218,241],"totalN":[87049,2973]}}};
+
+  var segs = ["NON VIP","VIP"];
+  var areas = ["Legs","Stakes"];
+
+  var LEG_KPI_DEFS = [
+    {id:'allLegs', label:'Avg Legs \u2014 All Bets', color:'#a78bfa', colorClass:'color-p1',
+      getData: function(d,seg,bt){ return d[seg][bt].allLegs; },
+      getCount: function(d,seg,bt){ return d[seg][bt].totalN; },
+      getAvg:  function(d,seg,bt){ var v=d[seg][bt].mean_allLegs; return v!==null&&v!==undefined?v.toFixed(1):'n/a'; }
+    },
+    {id:'ewLegs', label:'Avg Legs \u2014 Early Win Bets', color:'#4f8ef7', colorClass:'color-ew',
+      getData: function(d,seg,bt){ return d[seg][bt].ewLegs; },
+      getCount: function(d,seg,bt){ return d[seg][bt].ewN; },
+      getAvg:  function(d,seg,bt){ var v=d[seg][bt].mean_ewLegs; return v!==null&&v!==undefined?v.toFixed(1):'n/a'; }
+    },
+    {id:'coLegs', label:'Avg Legs \u2014 Cash Out Bets', color:'#34d399', colorClass:'color-co',
+      getData: function(d,seg,bt){ return d[seg][bt].coLegs; },
+      getCount: function(d,seg,bt){ return d[seg][bt].coN; },
+      getAvg:  function(d,seg,bt){ var v=d[seg][bt].mean_coLegs; return v!==null&&v!==undefined?v.toFixed(1):'n/a'; }
+    }
+  ];
+
+  var STAKE_KPI_DEFS = [
+    {id:'allStake', label:'Avg Stake \u2014 All Bets', color:'#a78bfa', colorClass:'color-p1',
+      getData: function(d,seg,bt){ return d[seg][bt].allStake; },
+      getCount: function(d,seg,bt){ return d[seg][bt].totalN; },
+      getAvg:  function(d,seg,bt){ var v=d[seg][bt].mean_allStake; return v!==null&&v!==undefined?v.toFixed(1):'n/a'; }
+    },
+    {id:'ewStake', label:'Avg Stake \u2014 Early Win Bets', color:'#4f8ef7', colorClass:'color-ew',
+      getData: function(d,seg,bt){ return d[seg][bt].ewStake; },
+      getCount: function(d,seg,bt){ return d[seg][bt].ewN; },
+      getAvg:  function(d,seg,bt){ var v=d[seg][bt].mean_ewStake; return v!==null&&v!==undefined?v.toFixed(1):'n/a'; }
+    },
+    {id:'coStake', label:'Avg Stake \u2014 Cash Out Bets', color:'#34d399', colorClass:'color-co',
+      getData: function(d,seg,bt){ return d[seg][bt].coStake; },
+      getCount: function(d,seg,bt){ return d[seg][bt].coN; },
+      getAvg:  function(d,seg,bt){ var v=d[seg][bt].mean_coStake; return v!==null&&v!==undefined?v.toFixed(1):'n/a'; }
+    }
+  ];
+
+  // Precompute global ymax for legs across ALL countries, ALL segments, ALL bet types
+  var allLegSources = legCountries.concat([legSummary]);
+  var globalLegsYmax = 0;
+  ['NON VIP','VIP'].forEach(function(seg) {
+    ['ALL','BetBuilderCombo','Multiple','System'].forEach(function(bt) {
+      allLegSources.forEach(function(src) {
+        if (src[seg] && src[seg][bt] && src[seg][bt].ymax) {
+          var v = src[seg][bt].ymax;
+          if (v > globalLegsYmax) globalLegsYmax = v;
+        }
+      });
+    });
+  });
+
+  // Precompute global ymax for stakes across ALL countries, ALL segments, ALL bet types
+  var allStakeSources = stakeCountries.concat([stakeSummary]);
+  var globalStakeYmax = 0;
+  ['NON VIP','VIP'].forEach(function(seg) {
+    ['ALL','BetBuilderCombo','Multiple','System'].forEach(function(bt) {
+      allStakeSources.forEach(function(src) {
+        if (src[seg] && src[seg][bt] && src[seg][bt].ymax) {
+          var v = src[seg][bt].ymax;
+          if (v > globalStakeYmax) globalStakeYmax = v;
+        }
+      });
+    });
+  });
+
+  var MAX_KPIS = 3;
+  var slChartStates = {};
+
+  function getKpiDefs(area) {
+    return area === 'Stakes' ? STAKE_KPI_DEFS : LEG_KPI_DEFS;
+  }
+  function getDefaultKpis(area) {
+    if (area === 'Stakes') return ['allStake','ewStake','coStake'];
+    return ['allLegs','ewLegs','coLegs'];
+  }
+
+  function getState(chartId) {
+    if (!slChartStates[chartId]) {
+      slChartStates[chartId] = {
+        seg:'NON VIP', betType:'ALL', area:'Legs',
+        activeKpis: getDefaultKpis('Legs'),
+        selectionOrder: getDefaultKpis('Legs').slice()
+      };
+    }
+    return slChartStates[chartId];
+  }
+
+  function getDataForChart(chartId, countryData) {
+    var state = getState(chartId);
+    return state.area === 'Stakes' ? countryData.stakes : countryData.legs;
+  }
+
+  function buildTraces(chartData, xLabels, chartId) {
+    var state = getState(chartId);
+    var seg   = state.seg;
+    var bt    = state.betType;
+    var active = state.activeKpis;
+    var kpiDefs = getKpiDefs(state.area);
+    var isStake = state.area === 'Stakes';
+
+    var traces = [];
+    kpiDefs.forEach(function(kpi) {
+      var isActive = active.indexOf(kpi.id) !== -1;
+      var vals = kpi.getData(chartData, seg, bt);
+      if (!vals || !vals.length) vals = xLabels.map(function(){ return null; });
+
+      var counts = kpi.getCount(chartData, seg, bt);
+      if (!counts || !counts.length) counts = xLabels.map(function(){ return null; });
+
+      var textArr = [];
+      if (isActive) {
+        textArr = vals.map(function(v){
+          if (v === null) return '';
+          return isStake ? v.toFixed(1) + '\u20ac' : v.toFixed(1);
+        });
+      }
+
+      traces.push({
+        name: kpi.label + '  |  avg: ' + (isStake ? kpi.getAvg(chartData, seg, bt) + '\u20ac' : kpi.getAvg(chartData, seg, bt)),
+        type:'bar', x:xLabels,
+        y: isActive ? vals : xLabels.map(function(){ return null; }),
+        customdata: isActive ? counts : xLabels.map(function(){ return null; }),
+        text: textArr,
+        textposition:'outside',
+        textfont:{family:'DM Mono, monospace', size:11, color:kpi.color},
+        cliponaxis:false,
+        marker:{color:kpi.color, opacity:0.85, line:{width:0}},
+        hovertemplate: (function(){ var p=kpi.label.split(' \u2014 '); return p[0]+': %{y:.1f}'+(isStake?'\u20ac':'')+' \u2014 '+p[1]+': %{customdata:,}'; })() + '<extra></extra>',
+        visible:isActive, legendgroup:kpi.id, showlegend:isActive
+      });
+    });
+    return traces;
+  }
+
+  function buildLayout(chartData, xLabels, chartId, title) {
+    var state = getState(chartId);
+    var activeSegIndex = Math.max(0, segs.indexOf(state.seg));
+    var isStake = state.area === 'Stakes';
+
+    // Use precomputed global ymax: one for legs, one for stakes
+    var ymax = isStake ? globalStakeYmax : globalLegsYmax;
+
+    var betTypes = ['ALL','BetBuilderCombo','Multiple','System'];
+    var betTypeLabels = ['All Bet Types','BB Combo','Multiple','System'];
+    var activeBtIndex = Math.max(0, betTypes.indexOf(state.betType));
+    var activeAreaIndex = Math.max(0, areas.indexOf(state.area));
+
+    return {
+      barmode:'group', bargap:0.22, bargroupgap:0.06,
+      paper_bgcolor:'#171c27', plot_bgcolor:'rgba(0,0,0,0)',
+      font:{family:'DM Sans, sans-serif', color:'#8b93ad'},
+      margin:{t:90, b:50, l:60, r:30},
+      hovermode:'x unified',
+      hoverlabel:{bgcolor:'#1e2436', bordercolor:'#252b3b', font:{family:'DM Sans, sans-serif', size:12, color:'#e8ecf4'}},
+      legend:{
+        orientation:'v', x:0.99, y:1.13, xanchor:'right', yanchor:'top',
+        font:{size:12, color:'#c8d0e8', family:'DM Sans, sans-serif'},
+        bgcolor:'rgba(23,28,39,0.85)', bordercolor:'#252b3b', borderwidth:1, tracegroupgap:10
+      },
+      xaxis:{tickfont:{size:11, color:'#6b7591'}, showgrid:false, zeroline:false, linecolor:'#252b3b', tickcolor:'#252b3b'},
+      yaxis:{
+        range:[0, ymax * 1.2],
+        tickfont:{size:11, color:'#6b7591', family:'DM Mono, monospace'},
+        gridcolor:'#1e2436', gridwidth:1, zeroline:false, showline:false, tickcolor:'rgba(0,0,0,0)',
+        ticksuffix: isStake ? '\u20ac' : ''
+      },
+      annotations:[
+        {text:'VIP Level', x:0.0, y:1.26, xref:'paper', yref:'paper', showarrow:false,
+         font:{size:10, color:'#6b7591', family:'DM Sans, sans-serif'}, xanchor:'left'},
+        {text:'Bet Type', x:0.12, y:1.26, xref:'paper', yref:'paper', showarrow:false,
+         font:{size:10, color:'#6b7591', family:'DM Sans, sans-serif'}, xanchor:'left'},
+        {text:'Area', x:0.24, y:1.26, xref:'paper', yref:'paper', showarrow:false,
+         font:{size:10, color:'#6b7591', family:'DM Sans, sans-serif'}, xanchor:'left'}
+      ],
+      updatemenus:[
+        {
+          active: activeSegIndex,
+          buttons: segs.map(function(s){ return {label:s, method:'skip', args:[[]]}; }),
+          direction:'down', showactive:true,
+          x:0.0, y:1.18, xanchor:'left',
+          bgcolor:'#1e2436', bordercolor:'#252b3b', font:{color:'#e8ecf4', size:12}
+        },
+        {
+          active: activeBtIndex,
+          buttons: betTypes.map(function(bt, idx){ return {label:betTypeLabels[idx], method:'skip', args:[[]]}; }),
+          direction:'down', showactive:true,
+          x:0.12, y:1.18, xanchor:'left',
+          bgcolor:'#1e2436', bordercolor:'#252b3b', font:{color:'#e8ecf4', size:12}
+        },
+        {
+          active: activeAreaIndex,
+          buttons: areas.map(function(a){ return {label:a, method:'skip', args:[[]]}; }),
+          direction:'down', showactive:true,
+          x:0.24, y:1.18, xanchor:'left',
+          bgcolor:'#1e2436', bordercolor:'#252b3b', font:{color:'#e8ecf4', size:12}
+        }
+      ]
+    };
+  }
+
+  function redraw(chartId, countryData, xLabels, title) {
+    var chartData = getDataForChart(chartId, countryData);
+    var traces = buildTraces(chartData, xLabels, chartId);
+    var layout = buildLayout(chartData, xLabels, chartId, title);
+    Plotly.react(chartId, traces, layout, {responsive:true, displayModeBar:false});
+  }
+
+  function rebuildPicker(pickerId, chartId, countryData, xLabels, title) {
+    var container = document.getElementById(pickerId);
+    if (!container) return;
+    container.innerHTML = '';
+    var state = getState(chartId);
+    var kpiDefs = getKpiDefs(state.area);
+
+    var label = document.createElement('span');
+    label.className = 'kpi-picker-label';
+    label.textContent = 'KPIs:';
+    container.appendChild(label);
+
+    var hintEl = document.createElement('span');
+    hintEl.className = 'kpi-max-hint';
+    hintEl.textContent = 'Max 3 selected';
+
+    kpiDefs.forEach(function(kpi) {
+      var pill = document.createElement('div');
+      pill.className = 'kpi-pill ' + kpi.colorClass;
+      pill.id = pickerId + '-' + kpi.id;
+      pill.innerHTML = '<span class="pill-dot"></span>' + kpi.label;
+      if (state.activeKpis.indexOf(kpi.id) !== -1) pill.classList.add('active');
+
+      pill.addEventListener('click', function() {
+        var st = getState(chartId);
+        var active = st.activeKpis;
+        var order  = st.selectionOrder;
+        var idx    = active.indexOf(kpi.id);
+        if (idx !== -1) {
+          if (active.length <= 1) return;
+          active.splice(idx, 1);
+          order.splice(order.indexOf(kpi.id), 1);
+          pill.classList.remove('active');
+        } else {
+          if (active.length >= MAX_KPIS) {
+            var oldest = order.shift();
+            active.splice(active.indexOf(oldest), 1);
+            var oldPill = document.getElementById(pickerId + '-' + oldest);
+            if (oldPill) oldPill.classList.remove('active');
+            hintEl.classList.add('show');
+            setTimeout(function(){ hintEl.classList.remove('show'); }, 1800);
+          }
+          active.push(kpi.id);
+          order.push(kpi.id);
+          pill.classList.add('active');
+        }
+        redraw(chartId, countryData, xLabels, title);
+      });
+      container.appendChild(pill);
+    });
+
+    container.appendChild(hintEl);
+  }
+
+  function initChart(chartId, pickerId, countryData, xLabels, title) {
+    var chartData = getDataForChart(chartId, countryData);
+    var traces = buildTraces(chartData, xLabels, chartId);
+    var layout = buildLayout(chartData, xLabels, chartId, title);
+    Plotly.newPlot(chartId, traces, layout, {responsive:true, displayModeBar:false});
+    rebuildPicker(pickerId, chartId, countryData, xLabels, title);
+
+    var betTypes = ['ALL','BetBuilderCombo','Multiple','System'];
+
+    document.getElementById(chartId).on('plotly_buttonclicked', function(e) {
+      var state = getState(chartId);
+      if (e.menu._index === 0) {
+        state.seg = segs[e.button._index];
+      } else if (e.menu._index === 1) {
+        state.betType = betTypes[e.button._index];
+      } else if (e.menu._index === 2) {
+        state.area = areas[e.button._index];
+        state.activeKpis = getDefaultKpis(state.area);
+        state.selectionOrder = getDefaultKpis(state.area).slice();
+        rebuildPicker(pickerId, chartId, countryData, xLabels, title);
+      }
+      redraw(chartId, countryData, xLabels, title);
+    });
+  }
+
+  var slCountryData = [];
+  for (var i = 0; i < legCountries.length; i++) {
+    slCountryData.push({ legs: legCountries[i], stakes: stakeCountries[i], name: legCountries[i].name });
+  }
+  var slSummaryData = { legs: legSummary, stakes: stakeSummary, name: 'All Countries' };
+
+  slCountryData.forEach(function(cd) {
+    var chartId  = 'sl-chart-' + cd.name;
+    var pickerId = 'sl-picker-' + cd.name;
+    var title    = 'Stakes & Legs \u2014 ' + cd.name;
+    initChart(chartId, pickerId, cd, slWeeks, title);
+  });
+
+  (function() {
+    var chartId  = 'sl-chart-summary';
+    var pickerId = 'sl-picker-summary';
+    var title    = 'Stakes & Legs \u2014 All Countries Summary';
+    initChart(chartId, pickerId, slSummaryData, slCountryLabels, title);
+  })();
+})();
+
+// Tab switching
+var _visitedTabs = {};
+var _activeTab = 'overview';
+
+var _sectionIds = {
+  user: ['user-key-findings','Greece','Brazil','Mexico','Chile','Ecuador','Ireland','summary'],
+  bet: ['bet-key-findings','bet-Greece','bet-Brazil','bet-summary'],
+  sl: ['sl-key-findings','sl-Greece','sl-Brazil','sl-summary'],
+  exec: [],
+  strategy: ['strategy-next']
+};
+
+function _getCountryName(sectionId) {
+  if (sectionId.match(/-key-findings$/)) return 'key-findings';
+  return sectionId.replace(/^(bet|sl)-/, '');
+}
+
+function _findSectionId(tab, countryName) {
+  if (!_sectionIds[tab]) return null;
+  var ids = _sectionIds[tab];
+  for (var i = 0; i < ids.length; i++) {
+    if (_getCountryName(ids[i]) === countryName) return ids[i];
+  }
+  return null;
+}
+
+function _detectVisibleCountry() {
+  var ids = _sectionIds[_activeTab];
+  if (!ids) return null;
+  var best = null, bestDist = Infinity;
+  for (var i = 0; i < ids.length; i++) {
+    var el = document.getElementById(ids[i]);
+    if (!el) continue;
+    var dist = Math.abs(el.getBoundingClientRect().top);
+    if (dist < bestDist) { bestDist = dist; best = _getCountryName(ids[i]); }
+  }
+  return best;
+}
+
+function switchTab(tab) {
+  var country = _detectVisibleCountry();
+  var firstVisit = !_visitedTabs[tab];
+  _visitedTabs[tab] = true;
+  _activeTab = tab;
+
+  document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(el) { el.classList.remove('active'); });
+  document.getElementById('tab-' + tab).classList.add('active');
+  var btns = document.querySelectorAll('.tab-btn');
+  btns.forEach(function(b) { if (b.getAttribute('data-tab') === tab) b.classList.add('active'); });
+
+  document.querySelectorAll('.sticky-top .country-nav').forEach(function(el) { el.classList.add('hidden'); });
+  document.getElementById('country-nav-' + tab).classList.remove('hidden');
+
+  document.body.classList.remove('theme-user', 'theme-bet', 'theme-sl', 'theme-overview', 'theme-strategy', 'theme-exec');
+  document.body.classList.add('theme-' + tab);
+
+  setTimeout(function() {
+    window.dispatchEvent(new Event('resize'));
+    var targetId = (!firstVisit && country) ? _findSectionId(tab, country) : null;
+    if (targetId) {
+      var target = document.getElementById(targetId);
+      if (target) {
+        var headerOffset = document.querySelector('.sticky-top') ? document.querySelector('.sticky-top').offsetHeight : 0;
+        var top = target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+        window.scrollTo({ top: top, behavior: 'instant' });
+        return;
+      }
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, 120);
+}
+
+// ══════════════════════════════════════════════
+// EXECUTIVE REPORT CHARTS
+// ══════════════════════════════════════════════
+(function() {
+  var darkBase = {
+    paper_bgcolor:'#171c27', plot_bgcolor:'rgba(0,0,0,0)',
+    font:{family:'DM Sans, sans-serif', color:'#8b93ad'},
+    margin:{t:50,b:50,l:60,r:30},
+    hovermode:'x unified',
+    hoverlabel:{bgcolor:'#1e2436',bordercolor:'#252b3b',font:{family:'DM Sans',size:12,color:'#e8ecf4'}},
+    legend:{orientation:'h',x:0.5,y:1.12,xanchor:'center',font:{size:11,color:'#c8d0e8'},bgcolor:'rgba(0,0,0,0)'},
+    xaxis:{tickfont:{size:11,color:'#6b7591'},showgrid:false,zeroline:false,linecolor:'#252b3b'},
+    yaxis:{tickfont:{size:11,color:'#6b7591',family:'DM Mono'},gridcolor:'#1e2436',zeroline:false,showline:false}
+  };
+  function dl(overrides) {
+    var l = JSON.parse(JSON.stringify(darkBase));
+    for (var k in overrides) l[k] = overrides[k];
+    return l;
+  }
+
+  // ── 1. Country Comparison: Adoption ──
+  var countries = ['Greece','Brazil','Mexico','Chile','Ecuador','Ireland'];
+  var nvEw  = [0.060, 0.034, 0.107, 0.078, 0.089, 0.037];
+  var nvCo  = [0.159, 0.181, 0.215, 0.210, 0.230, 0.102];
+  var vipEw = [0.102, 0.089, 0.194, 0.149, 0.130, 0.096];
+  var vipCo = [0.363, 0.459, 0.403, 0.420, 0.372, 0.278];
+  function pct(v){return (v*100).toFixed(1)+'%';}
+  Plotly.newPlot('exec-chart-adoption', [
+    {name:'Early Win Non-VIP', type:'bar', x:countries, y:nvEw, marker:{color:'rgba(79,142,247,0.45)',line:{color:'#4f8ef7',width:1}},
+     text:nvEw.map(pct), textposition:'outside', textfont:{size:10,color:'#4f8ef7',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Early Win Non-VIP: %{y:.1%}<extra></extra>'},
+    {name:'Early Win VIP', type:'bar', x:countries, y:vipEw, marker:{color:'#4f8ef7',line:{width:0}},
+     text:vipEw.map(pct), textposition:'outside', textfont:{size:10,color:'#4f8ef7',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Early Win VIP: %{y:.1%}<extra></extra>'},
+    {name:'Cash Out Non-VIP', type:'bar', x:countries, y:nvCo, marker:{color:'rgba(52,211,153,0.45)',line:{color:'#34d399',width:1}},
+     text:nvCo.map(pct), textposition:'outside', textfont:{size:10,color:'#34d399',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Cash Out Non-VIP: %{y:.1%}<extra></extra>'},
+    {name:'Cash Out VIP', type:'bar', x:countries, y:vipCo, marker:{color:'#34d399',line:{width:0}},
+     text:vipCo.map(pct), textposition:'outside', textfont:{size:10,color:'#34d399',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Cash Out VIP: %{y:.1%}<extra></extra>'}
+  ], dl({barmode:'group',bargap:0.25,bargroupgap:0.08,yaxis:{tickformat:'.0%',dtick:0.1,range:[0,0.55],tickfont:{size:11,color:'#6b7591',family:'DM Mono'},gridcolor:'#1e2436',zeroline:false,showline:false}}),
+  {responsive:true, displayModeBar:false});
+
+  // ── 2. Bettor Profiles — Legs ──
+  var legCats = ['Greece NON VIP','Greece VIP','Brazil NON VIP','Brazil VIP'];
+  var allLegs = [6.0, 5.4, 7.2, 6.0];
+  var ewLegs  = [8.4, 8.4, 9.7, 8.9];
+  var coLegs  = [5.5, 5.1, 6.5, 5.5];
+
+  Plotly.newPlot('exec-chart-legs', [
+    {name:'All Bets', type:'bar', x:legCats, y:allLegs, marker:{color:'#a78bfa'},
+     text:allLegs.map(function(v){return v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#a78bfa',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'All Bets: %{y:.1f} legs<extra></extra>'},
+    {name:'Early Win', type:'bar', x:legCats, y:ewLegs, marker:{color:'#4f8ef7'},
+     text:ewLegs.map(function(v){return v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#4f8ef7',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Early Win: %{y:.1f} legs<extra></extra>'},
+    {name:'Cash Out', type:'bar', x:legCats, y:coLegs, marker:{color:'#34d399'},
+     text:coLegs.map(function(v){return v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#34d399',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Cash Out: %{y:.1f} legs<extra></extra>'}
+  ], dl({barmode:'group',bargap:0.25,bargroupgap:0.1,yaxis:{range:[0,12],dtick:2,tickfont:{size:11,color:'#6b7591',family:'DM Mono'},gridcolor:'#1e2436',zeroline:false,showline:false},
+    xaxis:{tickfont:{size:10}},
+    annotations:[]}),
+  {responsive:true, displayModeBar:false});
+
+  // ── 3. Bettor Profiles — Stakes ──
+  var stakeCats = ['Greece NON VIP','Greece VIP','Brazil NON VIP','Brazil VIP'];
+  var allStake = [8.3, 32.0, 4.3, 18.5];
+  var ewStake  = [7.5, 38.0, 4.3, 25.6];
+  var coStake  = [14.3, 52.6, 7.3, 30.2];
+
+  Plotly.newPlot('exec-chart-stakes', [
+    {name:'All Bets', type:'bar', x:stakeCats, y:allStake, marker:{color:'#a78bfa'},
+     text:allStake.map(function(v){return '\u20AC'+v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#a78bfa',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'All Bets: \u20AC%{y:.1f}<extra></extra>'},
+    {name:'Early Win', type:'bar', x:stakeCats, y:ewStake, marker:{color:'#4f8ef7'},
+     text:ewStake.map(function(v){return '\u20AC'+v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#4f8ef7',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Early Win: \u20AC%{y:.1f}<extra></extra>'},
+    {name:'Cash Out', type:'bar', x:stakeCats, y:coStake, marker:{color:'#34d399'},
+     text:coStake.map(function(v){return '\u20AC'+v.toFixed(1);}), textposition:'outside', textfont:{size:11,color:'#34d399',family:'DM Mono'},cliponaxis:false,
+     hovertemplate:'Cash Out: \u20AC%{y:.1f}<extra></extra>'}
+  ], dl({barmode:'group',bargap:0.25,bargroupgap:0.1,yaxis:{range:[0,62],dtick:10,tickprefix:'\u20AC',tickfont:{size:11,color:'#6b7591',family:'DM Mono'},gridcolor:'#1e2436',zeroline:false,showline:false},
+    xaxis:{tickfont:{size:10}},
+    annotations:[]}),
+  {responsive:true, displayModeBar:false});
+})();
+</script>
+</body>
+</html>
